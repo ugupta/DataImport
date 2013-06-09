@@ -2,30 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.avarice</groupId>
-	<artifactId>dataimport</artifactId>
-	<name>DataImportTool</name>
+	<groupId>org.openmf</groupId>
+	<artifactId>mifos.dit</artifactId>
+	<name>Data Import Tool</name>
 	<packaging>war</packaging>
-	<version>1.0.0-BUILD-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<properties>
-		<java-version>1.7</java-version>
+		<java-version>1.6</java-version>
 		<org.springframework-version>3.2.3.RELEASE</org.springframework-version>
-		<org.aspectj-version>1.6.10</org.aspectj-version>
-		<org.slf4j-version>1.6.6</org.slf4j-version>
 	</properties>
 	<dependencies>
-		<!-- Spring -->
+		<!-- Spring 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${org.springframework-version}</version>
-			<exclusions>
-				<!-- Exclude Commons Logging in favor of SLF4j -->
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				 </exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -36,16 +27,16 @@
 	         <groupId>org.springframework</groupId>
 	         <artifactId>spring-tx</artifactId>
 	         <version>3.2.3.RELEASE</version>
-         </dependency>
+         </dependency> -->
 				
-		<!-- AspectJ -->
+		<!-- AspectJ
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>${org.aspectj-version}</version>
 		</dependency>	
-		
-		<!-- Logging -->
+		 -->
+		<!-- Logging
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -86,7 +77,7 @@
 				</exclusion>
 			</exclusions>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency> -->
 
 		<!-- @Inject -->
 		<dependency>
@@ -129,7 +120,7 @@
 	       <version>3.9</version>
         </dependency>   
         
-         <!-- Hibernate framework -->
+         <!-- Hibernate framework
 	<dependency>
        <groupId>org.hibernate</groupId>
        <artifactId>hibernate-core</artifactId>
@@ -153,7 +144,7 @@
 	    <artifactId>mysql-connector-java</artifactId>
 	    <version>5.1.6</version>
     </dependency>
-    
+     -->
     <!-- Apache Commons Upload --> 
 	<dependency>
 		<groupId>commons-fileupload</groupId>
@@ -170,20 +161,6 @@
 	</dependencies>
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <additionalProjectnatures>
-                        <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
-                    </additionalProjectnatures>
-                    <additionalBuildcommands>
-                        <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
-                    </additionalBuildcommands>
-                    <downloadSources>true</downloadSources>
-                    <downloadJavadocs>true</downloadJavadocs>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
