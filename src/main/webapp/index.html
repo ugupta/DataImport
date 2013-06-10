@@ -1,0 +1,27 @@
+<html>
+<head>
+	<title>Home</title>
+    <script>
+    </script>
+    <style>
+    </style>
+</head>
+<body>
+<h3>
+	Data Import  
+</h3>
+<div id="container">
+	<a href="download?type=office">Offices</a>
+	<a href="download?type=staff">Staff</a>
+	<a href="download?type=client">Clients</a>
+	<a href="download?type=loanProducts">Loan Products</a>
+	<a href="download?type=loanAccounts">Loan Accounts</a>
+
+	
+	<form method="post" action="import" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+	</form>
+	</div>
+	</body>
+</html>
