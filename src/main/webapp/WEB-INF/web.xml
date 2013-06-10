@@ -5,7 +5,7 @@
 
 	<servlet>
 		<servlet-name>DataImportServlet</servlet-name>
-		<servlet-class>org.openmf.mifos.dit.web.DataImportServlet</servlet-class>
+		<servlet-class>org.openmf.mifos.dataimport.web.DataImportServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
