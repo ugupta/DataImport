@@ -22,7 +22,7 @@ public class Office {
         this.name = name;
         this.perentId = perentId;
         this.externalId = externalId;
-        this.openingDate = openingDate;
+        this.openingDate = (Date) openingDate.clone();
         this.rowIndex = rowIndex;
     }
 
@@ -39,7 +39,7 @@ public class Office {
     }
 
     public Date getOpeningDate() {
-        return this.openingDate;
+        return (Date) this.openingDate.clone();
     }
 
     public Integer getRowIndex() {

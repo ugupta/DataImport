@@ -1,5 +1,6 @@
 package org.openmf.mifos.dataimport;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
 
@@ -49,7 +50,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
             HttpResponse response = client.execute(postRequest);
             // might have to check IO close
             return new Gson().fromJson(new InputStreamReader(response.getEntity().getContent(), "UTF-8"), AuthToken.class).getBase64EncodedAuthenticationKey();
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -64,7 +65,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
             postRequest.setEntity(new StringEntity(payload, "UTF-8"));
             HttpResponse response = client.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) { throw new IllegalStateException("failed : " + response.getStatusLine()); }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }

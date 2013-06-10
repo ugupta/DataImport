@@ -13,7 +13,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
 import org.openmf.mifos.dataimport.DataImportHandler;
 import org.openmf.mifos.dataimport.ImportHandlerFactory;
 import org.openmf.mifos.dataimport.Result;
@@ -21,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataImportServlet extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(DataImportServlet.class);
 
@@ -66,9 +67,10 @@ public class DataImportServlet extends HttpServlet {
     }
     
 
-    private void writeErrors(Result parseResult, HttpServletResponse response) {
-        // TODO Auto-generated method stub
-        
+    private void writeErrors(Result parseResult, HttpServletResponse response) throws IOException {
+        for(String e : parseResult.getErrors()) {
+            response.getWriter().println(e);
+        }
     }
 
 }
