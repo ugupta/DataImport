@@ -1,16 +1,9 @@
 package org.openmf.mifos.dataimport;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.Date;
 
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.openmf.mifos.dataimport.dto.AuthToken;
@@ -41,30 +34,31 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     };
 
     private String createAuthToken() {
-        HttpClient client = new DefaultHttpClient();
-        HttpPost postRequest = new HttpPost(baseURL + "authentication?username=" + userName + "&password=" + password);
-        postRequest.setHeader("X-Mifos-Platform-TenantId", tenantId);
-        postRequest.setHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
-
+        String url = baseURL + "authentication?username=" + userName + "&password=" + password;
         try {
-            HttpResponse response = client.execute(postRequest);
+
+            SimpleHttpClient sClient = new SimpleHttpClient(url, SimpleHttpClient.Method.POST);
+            sClient.header("X-Mifos-Platform-TenantId", tenantId).header("Content-Type", "application/json; charset=utf-8");
+            sClient.execute();
             // might have to check IO close
-            return new Gson().fromJson(new InputStreamReader(response.getEntity().getContent(), "UTF-8"), AuthToken.class).getBase64EncodedAuthenticationKey();
+            return new Gson().fromJson(sClient.getContent(), AuthToken.class).getBase64EncodedAuthenticationKey();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    protected void post(String url, String payload) {
-        HttpClient client = new DefaultHttpClient();
-        HttpPost postRequest = new HttpPost(baseURL + url);
-        postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + authToken);
-        postRequest.setHeader("X-Mifos-Platform-TenantId", tenantId);
-        postRequest.setHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+    protected void post(String path, String payload) {
+        String url = baseURL + path;
+
         try {
-            postRequest.setEntity(new StringEntity(payload, "UTF-8"));
-            HttpResponse response = client.execute(postRequest);
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) { throw new IllegalStateException("failed : " + response.getStatusLine()); }
+
+            SimpleHttpClient sClient = new SimpleHttpClient(url, SimpleHttpClient.Method.POST);
+            sClient.header("Authorization", "Basic " + authToken);
+            sClient.header("X-Mifos-Platform-TenantId", tenantId);
+            sClient.header("Content-Type", "application/json; charset=utf-8");
+
+            sClient.sendContent(payload);
+            if (sClient.status() != HttpURLConnection.HTTP_OK) { throw new IllegalStateException("failed with status " + sClient.status()); }
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
