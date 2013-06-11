@@ -4,9 +4,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Date;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.openmf.mifos.dataimport.dto.AuthToken;
+import org.openmf.mifos.dataimport.http.HttpRequestBuilder;
+import org.openmf.mifos.dataimport.http.SimpleHttpRequest.Header;
+import org.openmf.mifos.dataimport.http.SimpleHttpRequest.Method;
+import org.openmf.mifos.dataimport.http.SimpleHttpResponse;
 
 import com.google.gson.Gson;
 
@@ -37,11 +42,12 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         String url = baseURL + "authentication?username=" + userName + "&password=" + password;
         try {
 
-            SimpleHttpClient sClient = new SimpleHttpClient(url, SimpleHttpClient.Method.POST);
-            sClient.header("X-Mifos-Platform-TenantId", tenantId).header("Content-Type", "application/json; charset=utf-8");
-            sClient.execute();
+            SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
+            		.addHeader(Header.MIFOS_TENANT_ID, tenantId)
+            		.addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8").execute();
+
             // might have to check IO close
-            return new Gson().fromJson(sClient.getContent(), AuthToken.class).getBase64EncodedAuthenticationKey();
+            return new Gson().fromJson(IOUtils.toString(response.getContent()), AuthToken.class).getBase64EncodedAuthenticationKey();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -52,13 +58,13 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
 
         try {
 
-            SimpleHttpClient sClient = new SimpleHttpClient(url, SimpleHttpClient.Method.POST);
-            sClient.header("Authorization", "Basic " + authToken);
-            sClient.header("X-Mifos-Platform-TenantId", tenantId);
-            sClient.header("Content-Type", "application/json; charset=utf-8");
+        	SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
+        			.addHeader(Header.AUTHORIZATION, "Basic " + authToken)
+    				.addHeader(Header.MIFOS_TENANT_ID, tenantId)
+    				.addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8")
+    				.withContent(payload).execute();
 
-            sClient.sendContent(payload);
-            if (sClient.status() != HttpURLConnection.HTTP_OK) { throw new IllegalStateException("failed with status " + sClient.status()); }
+            if (response.getStatus() != HttpURLConnection.HTTP_OK) { throw new IllegalStateException("failed with status " + response.getStatus()); }
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
