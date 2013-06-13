@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +21,8 @@ import org.openmf.mifos.dataimport.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@WebServlet(name = "DataImportServlet", urlPatterns = {"/import"})
+@MultipartConfig(maxFileSize=10000000, fileSizeThreshold=10000000)
 public class DataImportServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
