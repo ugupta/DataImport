@@ -16,6 +16,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.openmf.mifos.dataimport.DataImportHandler;
+import org.openmf.mifos.dataimport.ImportFormatType;
 import org.openmf.mifos.dataimport.ImportHandlerFactory;
 import org.openmf.mifos.dataimport.Result;
 import org.slf4j.Logger;
@@ -37,9 +38,9 @@ public class DataImportServlet extends HttpServlet {
                 if (!item.isFormField()) {
                    // String fieldname = item.getFieldName();
                    // String filename = FilenameUtils.getName(item.getName());
-                    if (!item.getContentType().equals("application/vnd.ms-excel")) { throw new FileUploadException("Only excel files accepted! provided : " +item.getContentType() ); }
+                    ImportFormatType type = checkAndGet(item.getContentType());
                     InputStream content = item.getInputStream();
-                    DataImportHandler handler = ImportHandlerFactory.createImportHandler(content);
+                    DataImportHandler handler = ImportHandlerFactory.createImportHandler(content, type);
                     parse(response, handler);
                 }
             }
@@ -47,6 +48,11 @@ public class DataImportServlet extends HttpServlet {
             throw new ServletException("Cannot upload request.", e);
         }
 
+    }
+
+    private ImportFormatType checkAndGet(String mimeType) throws FileUploadException {
+        if (!mimeType.equals("application/vnd.ms-excel")) { throw new FileUploadException("Only excel files accepted! provided : " +mimeType ); }
+        return ImportFormatType.valueOf(mimeType);
     }
 
     private void parse(HttpServletResponse response, DataImportHandler handler) throws IOException {

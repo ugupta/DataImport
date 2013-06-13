@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class ImportHandlerFactory {
     
     
-    public static final DataImportHandler createImportHandler(InputStream content) throws IOException {
+    public static final DataImportHandler createImportHandler(InputStream content, @SuppressWarnings("unused") ImportFormatType type) throws IOException {
 
         Workbook workbook = new HSSFWorkbook(content);
         
