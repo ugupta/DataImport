@@ -33,10 +33,9 @@ public class DataImportServlet extends HttpServlet {
                 if (!item.isFormField()) {
                    // String fieldname = item.getFieldName();
                    // String filename = FilenameUtils.getName(item.getName());
-                    if (!item.getContentType().equals("application/vnd.ms-excel")) { throw new FileUploadException("Only excel files accepted!"); }
+                    if (!item.getContentType().equals("application/vnd.ms-excel")) { throw new FileUploadException("Only excel files accepted! provided : " +item.getContentType() ); }
                     InputStream content = item.getInputStream();
                     DataImportHandler handler = ImportHandlerFactory.createImportHandler(content);
-
                     parse(response, handler);
                 }
             }
@@ -50,6 +49,7 @@ public class DataImportServlet extends HttpServlet {
         Result parseResult = handler.parse();
         if (parseResult.isSuccess()) {
             upload(response, handler);
+            response.getWriter().write("Success!");
             return;
         }
         writeErrors(parseResult, response);

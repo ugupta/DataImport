@@ -21,13 +21,13 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
 
     private final String baseURL;
 
-    private final String authToken;
-
     private final String userName;
 
     private final String password;
 
     private final String tenantId;
+
+    private String authToken;
 
     public AbstractDataImportHandler(Sheet sheet) {
         this.sheet = sheet;
@@ -35,7 +35,6 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         userName = "mifos"; // System.getProperty("mifos.user.id");
         password = "password"; // System.getProperty("mifos.password");
         tenantId = "default"; // System.getProperty("mifos.tenant.id");
-        authToken = createAuthToken();
     };
 
     private String createAuthToken() {
@@ -54,6 +53,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
 
     protected void post(String path, String payload) {
+        authToken = createAuthToken();
         String url = baseURL + path;
 
         try {
@@ -85,7 +85,11 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
 
     protected String readAsString(int colIndex, Row row) {
-        return row.getCell(colIndex).getStringCellValue();
+        try {
+            return row.getCell(colIndex).getStringCellValue();
+        } catch (Exception e) {
+            return row.getCell(colIndex).getNumericCellValue() + "";
+        }
     }
 
     protected Date readAsDate(int colIndex, Row row) {
