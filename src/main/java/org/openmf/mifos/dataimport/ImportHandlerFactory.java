@@ -10,17 +10,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class ImportHandlerFactory {
     
     
-    public static final DataImportHandler createImportHandler(InputStream content) throws IOException {
-        
-        DataImportHandler importHandler = null;
+    public static final DataImportHandler createImportHandler(InputStream content, @SuppressWarnings("unused") ImportFormatType type) throws IOException {
 
         Workbook workbook = new HSSFWorkbook(content);
         
         if(workbook.getSheet("Offices") != null) {
-            importHandler = new OfficeDataImportHandler(workbook.getSheet("Offices"));
+             return new OfficeDataImportHandler(workbook.getSheet("Offices"));
         }
-        
-        return importHandler;
+        throw new IllegalArgumentException("No work sheet found for processing : active sheet " + workbook.getSheetName(0));
     }
 
 }

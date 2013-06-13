@@ -33,8 +33,9 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
         Integer noOfEntries = getNumberOfRows();
         logger.info(noOfEntries.toString());
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
+            Row row;
             try {
-                Row row = sheet.getRow(rowIndex);
+                row = sheet.getRow(rowIndex);
                 String externalId = readAsString(EXTERNAL_ID_COL, row);
                 int parentId = readAsInt(PARENT_ID_COL, row);
                 String officeName = readAsString(OFFICE_NAME_COL, row);
@@ -43,11 +44,10 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
                 offices.add(new Office(officeName, parentId, externalId, openingDate, rowIndex));
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
-                result.addError("Row = " + rowIndex + " ," + e.getMessage());
+                result.addError("Row = " + rowIndex + " , " + e.getMessage());
             }
         }
-
-        return null;
+        return result;
     }
 
     @Override
