@@ -1,10 +1,11 @@
 package org.openmf.mifos.dataimport;
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Date;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.openmf.mifos.dataimport.dto.AuthToken;
@@ -46,10 +47,17 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
             		.addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8").execute();
 
             // might have to check IO close
-            return new Gson().fromJson(IOUtils.toString(response.getContent()), AuthToken.class).getBase64EncodedAuthenticationKey();
+            return new Gson().fromJson(readContentAndClose(response.getContent()), AuthToken.class).getBase64EncodedAuthenticationKey();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private String readContentAndClose(InputStream content) throws IOException {
+        DataInputStream stream = new DataInputStream(content);
+        String data = stream.readUTF();
+        stream.close();
+        return data;
     }
 
     protected void post(String path, String payload) {

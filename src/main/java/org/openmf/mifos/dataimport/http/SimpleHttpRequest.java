@@ -1,14 +1,12 @@
 package org.openmf.mifos.dataimport.http;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.io.IOUtils;
 
 public class SimpleHttpRequest {
 
@@ -37,10 +35,19 @@ public class SimpleHttpRequest {
         }
         if (content != null) {
             connection.setDoOutput(true);
-            OutputStream out = connection.getOutputStream();
-            IOUtils.write(content, out);
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            out.writeUTF(content);
+            close(out);
+        }
+    }
+
+    private void close(DataOutputStream out) throws IOException {
+        
+        try {
             out.flush();
             out.close();
+        } catch (IOException e) {
+                out.close();
         }
     }
     

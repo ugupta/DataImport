@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import org.apache.commons.io.IOUtils;
-
 public class SimpleHttpResponse
 {
 
@@ -29,9 +27,17 @@ public class SimpleHttpResponse
 		return content;
 	}
 
-	public void destroy()
-	{
-		IOUtils.closeQuietly(content);
-	}
+	@SuppressWarnings("PMD")
+        public void destroy() {
+            if (content != null) try {
+                content.close();
+            } catch (IOException e) {
+                try {
+                    content.close();
+                } catch (IOException e1) {
+                    // do nothing
+                }
+            }
+        }
 
 }

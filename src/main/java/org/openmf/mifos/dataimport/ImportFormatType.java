@@ -17,4 +17,13 @@ public enum ImportFormatType {
     public String getFormat() {
         return format;
     }
+    
+    public static ImportFormatType of(String name) {
+        for(ImportFormatType type : ImportFormatType.values()) {
+            if(type.getFormat().equals(name)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("not defined : " + name);
+    }
 }
