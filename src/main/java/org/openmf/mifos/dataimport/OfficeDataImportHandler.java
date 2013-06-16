@@ -70,5 +70,9 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
         }
         return null;
     }
+    
+    public List<Office> getOffices() {
+        return offices;
+    }
 
 }
