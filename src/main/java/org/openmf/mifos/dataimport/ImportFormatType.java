@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport;
 
 
+
 public enum ImportFormatType {
     
     XLSX_OPEN ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
@@ -24,6 +25,6 @@ public enum ImportFormatType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("not defined : " + name);
+        throw new IllegalArgumentException("Only excel files accepted! provided : " +name );
     }
 }

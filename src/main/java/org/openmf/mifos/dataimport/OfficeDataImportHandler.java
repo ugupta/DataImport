@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.openmf.mifos.dataimport.dto.Office;
+import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +23,12 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
     private static final Logger logger = LoggerFactory.getLogger(OfficeDataImportHandler.class);
 
     private List<Office> offices = new ArrayList<Office>();
+    
+    private final RestClient client;
 
-    public OfficeDataImportHandler(Sheet sheet) {
+    public OfficeDataImportHandler(Sheet sheet, RestClient client) {
         super(sheet);
+        this.client = client;
     }
 
     @Override
@@ -57,7 +61,7 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
             try {
                 Gson gson = new Gson();
                 String payload = gson.toJson(office);
-                post("offices", payload);
+                client.post("offices", payload);
             } catch (Exception e) {
                 logger.error("row = " + office.getRowIndex(), e);
                 result.addError("Row = " + office.getRowIndex() + " ," + e.getMessage());
@@ -65,6 +69,10 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
 
         }
         return null;
+    }
+    
+    public List<Office> getOffices() {
+        return offices;
     }
 
 }
