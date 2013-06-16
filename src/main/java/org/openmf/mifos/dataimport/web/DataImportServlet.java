@@ -1,7 +1,10 @@
 package org.openmf.mifos.dataimport.web;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -31,55 +34,47 @@ public class DataImportServlet extends HttpServlet {
         String filename = "";
         try {
             Part part = request.getPart("file");
-            
-            for (String s : part.getHeader("content-disposition").split(";")) {
-                if (s.trim().startsWith("filename")) {
-                    filename = s.split("=")[1].replaceAll("\"", "");
-                }
-            }
-            ImportFormatType type = checkAndGet(part.getContentType());
+            filename = readFileName(part);
+            ImportFormatType type = ImportFormatType.of(part.getContentType());
             InputStream content = part.getInputStream();
             DataImportHandler handler = ImportHandlerFactory.createImportHandler(content, type);
-            parse(response, handler);
-        
-    
+            Result result = parseAndUpload(handler);
+            writeResult(result, response.getOutputStream());
         } catch (IOException e) {
-            throw new ServletException("Cannot upload request." + filename, e);
+            throw new ServletException("Cannot import request. " + filename, e);
         }
 
     }
 
-    private ImportFormatType checkAndGet(String mimeType) throws IOException {
-        if (!mimeType.equals("application/vnd.ms-excel")) { throw new IOException("Only excel files accepted! provided : " +mimeType ); }
-        return ImportFormatType.of(mimeType);
+    String readFileName(Part part) {
+        String filename = null;
+        for (String s : part.getHeader("content-disposition").split(";")) {
+            if (s.trim().startsWith("filename")) {
+                filename = s.split("=")[1].replaceAll("\"", "");
+            }
+        }
+        return filename;
     }
 
-    private void parse(HttpServletResponse response, DataImportHandler handler) throws IOException {
-        Result parseResult = handler.parse();
-        if (parseResult.isSuccess()) {
-            upload(response, handler);
-            response.getWriter().write("Success!");
-            return;
+    Result parseAndUpload(DataImportHandler handler) throws IOException {
+        Result result = handler.parse();
+        if (result.isSuccess()) {
+            result = handler.upload();
         }
-        writeErrors(parseResult, response);
+        return result;
     }
 
-    private void upload(HttpServletResponse response, DataImportHandler handler) throws IOException {
-        Result uploadResult = handler.upload();
-        if (uploadResult.isSuccess()) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write("Complete!");
-            logger.info("Upload successful!");
-            return;
+    void writeResult(Result result, OutputStream stream) throws IOException {
+        DataOutputStream ds = new DataOutputStream(stream);
+        if(result.isSuccess()) {
+            ds.writeUTF("Import complete");
+            logger.debug("failed" + result);
         }
-        writeErrors(uploadResult, response);
-    }
-    
-
-    private void writeErrors(Result parseResult, HttpServletResponse response) throws IOException {
-        for(String e : parseResult.getErrors()) {
-            response.getWriter().println(e);
+        for(String e : result.getErrors()) {
+            ds.writeUTF(e);
         }
+        ds.flush();
+        ds.close();
     }
 
 }
