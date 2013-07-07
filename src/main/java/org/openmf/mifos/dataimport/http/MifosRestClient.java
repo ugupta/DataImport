@@ -1,17 +1,22 @@
 package org.openmf.mifos.dataimport.http;
 
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
 import org.openmf.mifos.dataimport.dto.AuthToken;
 import org.openmf.mifos.dataimport.http.SimpleHttpRequest.Method;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
 
 public class MifosRestClient implements RestClient {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MifosRestClient.class);
     
     private final String baseURL;
 
@@ -24,7 +29,8 @@ public class MifosRestClient implements RestClient {
     private String authToken;
     
     public MifosRestClient() {
-        baseURL = "http://localhost:8080/api/v1/"; // System.getProperty("mifos.endpoint");
+    	
+        baseURL = "https://demo.openmf.org/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
         userName = "mifos"; // System.getProperty("mifos.user.id");
         password = "password"; // System.getProperty("mifos.password");
         tenantId = "default"; // System.getProperty("mifos.tenant.id");
@@ -41,15 +47,13 @@ public class MifosRestClient implements RestClient {
     public void post(String path, String payload) {
         authToken = createAuthToken();
         String url = baseURL + path;
-
         try {
 
                 SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
                                 .addHeader(Header.AUTHORIZATION, "Basic " + authToken)
-                                .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                                 .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8")
+                                .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                                 .withContent(payload).execute();
-
             if (response.getStatus() != HttpURLConnection.HTTP_OK) { throw new IllegalStateException("failed with status " + response.getStatus()); }
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -59,11 +63,10 @@ public class MifosRestClient implements RestClient {
     private String createAuthToken() {
         String url = baseURL + "authentication?username=" + userName + "&password=" + password;
         try {
-
             SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
                         .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                         .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8").execute();
-
+            logger.info("Status: "+response.getStatus());
             String content = readContentAndClose(response.getContent());
             AuthToken auth = new Gson().fromJson(content, AuthToken.class);
             return auth.getBase64EncodedAuthenticationKey();
@@ -73,9 +76,11 @@ public class MifosRestClient implements RestClient {
     }
 
     private String readContentAndClose(InputStream content) throws IOException {
-        DataInputStream stream = new DataInputStream(content);
-        String data = stream.readUTF();
+        InputStreamReader stream = new InputStreamReader(content,"UTF-8");
+        BufferedReader reader = new BufferedReader(stream);
+        String data = reader.readLine();
         stream.close();
+        reader.close();
         return data;
     }
 

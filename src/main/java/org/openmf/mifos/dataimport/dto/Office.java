@@ -1,6 +1,6 @@
 package org.openmf.mifos.dataimport.dto;
 
-import java.util.Date;
+import java.util.Locale;
 
 
 public class Office {
@@ -9,37 +9,50 @@ public class Office {
     
     private final String name;
     
-    private final Integer perentId;
+    private final String parentId;
+    
+    private final String dateFormat="dd MMMM yyyy";
+    
+    private final Locale locale;
+    
+    private final String openingDate;
     
     private final String externalId;
-    
-    private final Date openingDate;
 
-    public Office(String name, Integer perentId, String externalId, Date openingDate, Integer rowIndex) {
+    public Office(String name, String parentId, String externalId, String openingDate, Locale locale, Integer rowIndex ) {
         if(name == null || name.trim().equals("")) {
             throw new IllegalArgumentException("name can not be empty");
         }
         this.name = name;
-        this.perentId = perentId;
+        this.parentId = parentId;
         this.externalId = externalId;
-        this.openingDate = (Date) openingDate.clone();
+        this.openingDate = openingDate;
         this.rowIndex = rowIndex;
+        this.locale = locale;
     }
 
     public String getName() {
         return this.name;
     }
 
-    public Integer getPerentId() {
-        return this.perentId;
+    public String getParentId() {
+        return this.parentId;
     }
 
     public String getExternalId() {
         return this.externalId;
     }
 
-    public Date getOpeningDate() {
-        return (Date) this.openingDate.clone();
+    public String getOpeningDate() {
+        return this.openingDate;
+    }
+    
+    public Locale getLocale() {
+    	return locale;
+    }
+    
+    public String getDateFormat() {
+    	return dateFormat;
     }
 
     public Integer getRowIndex() {

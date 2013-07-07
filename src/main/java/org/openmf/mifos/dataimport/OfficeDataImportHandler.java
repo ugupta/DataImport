@@ -1,8 +1,8 @@
 package org.openmf.mifos.dataimport;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,18 +34,17 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
     @Override
     public Result parse() {
         Result result = new Result();
+        Locale locale = Locale.ENGLISH;
         Integer noOfEntries = getNumberOfRows();
-        logger.info(noOfEntries.toString());
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
                 row = sheet.getRow(rowIndex);
                 String externalId = readAsString(EXTERNAL_ID_COL, row);
-                int parentId = readAsInt(PARENT_ID_COL, row);
+                Integer parentId = readAsInt(PARENT_ID_COL, row);
                 String officeName = readAsString(OFFICE_NAME_COL, row);
-                Date openingDate = readAsDate(OPENING_DATE_COL, row);
-                logger.debug("Row Contents: " + parentId + ", " + externalId + ", " + officeName + ", " + openingDate);
-                offices.add(new Office(officeName, parentId, externalId, openingDate, rowIndex));
+                String openingDate = readAsDate(OPENING_DATE_COL, row);
+                offices.add(new Office(officeName, parentId.toString(), externalId, openingDate, locale, rowIndex));
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -61,6 +60,7 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
             try {
                 Gson gson = new Gson();
                 String payload = gson.toJson(office);
+                logger.info(payload);
                 client.post("offices", payload);
             } catch (Exception e) {
                 logger.error("row = " + office.getRowIndex(), e);

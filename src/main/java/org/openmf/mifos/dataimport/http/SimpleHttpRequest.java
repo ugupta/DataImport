@@ -1,14 +1,19 @@
 package org.openmf.mifos.dataimport.http;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SimpleHttpRequest {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SimpleHttpRequest.class);
 
     private static final int HTTP_TIMEOUT = 100 * 1000; // 100 secs
 	
@@ -29,13 +34,14 @@ public class SimpleHttpRequest {
         }
         if (content != null) {
             connection.setDoOutput(true);
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeUTF(content);
+            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(),"UTF-8");
+            out.write(content);
             close(out);
+            logger.info(connection.getResponseMessage());
         }
     }
 
-    private void close(DataOutputStream out) throws IOException {
+    private void close(OutputStreamWriter out) throws IOException {
         
         try {
             out.flush();

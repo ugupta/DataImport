@@ -6,7 +6,6 @@ import java.net.HttpURLConnection;
 
 public class SimpleHttpResponse
 {
-
 	private HttpURLConnection connection;
 	
 	private InputStream content;
@@ -20,6 +19,7 @@ public class SimpleHttpResponse
 	{
 		return connection.getResponseCode();
 	}
+	
 
 	public InputStream getContent() throws IOException
 	{

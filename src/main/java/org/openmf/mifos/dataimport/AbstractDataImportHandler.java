@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport;
 
-import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,12 +32,13 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         try {
             return row.getCell(colIndex).getStringCellValue();
         } catch (Exception e) {
-            return row.getCell(colIndex).getNumericCellValue() + "";
+            return ((Double)row.getCell(colIndex).getNumericCellValue()).intValue() + "";
         }
     }
 
-    protected Date readAsDate(int colIndex, Row row) {
-        return row.getCell(colIndex).getDateCellValue();
+    protected String readAsDate(int colIndex, Row row) {
+    	DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        return dateFormat.format(row.getCell(colIndex).getDateCellValue());
     }
 
 }
