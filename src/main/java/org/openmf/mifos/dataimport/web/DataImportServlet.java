@@ -1,9 +1,9 @@
 package org.openmf.mifos.dataimport.web;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import org.openmf.mifos.dataimport.DataImportHandler;
-import org.openmf.mifos.dataimport.ImportFormatType;
-import org.openmf.mifos.dataimport.ImportHandlerFactory;
-import org.openmf.mifos.dataimport.Result;
+import org.openmf.mifos.dataimport.handler.DataImportHandler;
+import org.openmf.mifos.dataimport.handler.ImportFormatType;
+import org.openmf.mifos.dataimport.handler.ImportHandlerFactory;
+import org.openmf.mifos.dataimport.handler.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,16 +65,16 @@ public class DataImportServlet extends HttpServlet {
     }
 
     void writeResult(Result result, OutputStream stream) throws IOException {
-        DataOutputStream ds = new DataOutputStream(stream);
+        OutputStreamWriter out = new OutputStreamWriter(stream,"UTF-8");
         if(result.isSuccess()) {
-            ds.writeUTF("Import complete");
-            logger.debug("failed" + result);
+            out.write("Import complete");
         }
         for(String e : result.getErrors()) {
-            ds.writeUTF(e);
+            out.write(e);
+            logger.debug("failed" + result);
         }
-        ds.flush();
-        ds.close();
+        out.flush();
+        out.close();
     }
 
 }

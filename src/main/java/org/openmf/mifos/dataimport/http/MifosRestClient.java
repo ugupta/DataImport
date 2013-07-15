@@ -28,6 +28,21 @@ public class MifosRestClient implements RestClient {
 
     private String authToken;
     
+//    static {
+//	    //for localhost testing only
+//	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+//	    new javax.net.ssl.HostnameVerifier(){
+//
+//	    	@Override
+//	        public boolean verify(String hostname, @SuppressWarnings("unused") SSLSession sslSession) {
+//	            if (hostname.equals("localhost")) {
+//	                return true;
+//	            }
+//	            return false;
+//	        }
+//	    });
+//	}
+    
     public MifosRestClient() {
     	
         baseURL = "https://demo.openmf.org/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
@@ -44,8 +59,7 @@ public class MifosRestClient implements RestClient {
     
 
     @Override
-    public void post(String path, String payload) {
-        authToken = createAuthToken();
+    public String post(String path, String payload) {
         String url = baseURL + path;
         try {
 
@@ -54,13 +68,38 @@ public class MifosRestClient implements RestClient {
                                 .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8")
                                 .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                                 .withContent(payload).execute();
-            if (response.getStatus() != HttpURLConnection.HTTP_OK) { throw new IllegalStateException("failed with status " + response.getStatus()); }
+            if (response.getStatus() != HttpURLConnection.HTTP_OK) 
+              { 
+            	throw new IllegalStateException("Failed with status : " + response.getStatus());
+              }
+            String content = readContentAndClose(response.getContent());
+            return content;
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
+    
+    @Override
+    public String get(String path) {
+    	String url = baseURL + path;
+    	try {
+    		      SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.GET)
+    		    		          .addHeader(Header.AUTHORIZATION, "Basic " + authToken)
+    		    		          .addHeader(Header.MIFOS_TENANT_ID,tenantId)
+    		    		          .execute();
+    		      if(response.getStatus() != HttpURLConnection.HTTP_OK)
+    		      {
+    		    	  throw new IllegalStateException("Failed with status : " + response.getStatus());
+    		      }
+    		      String content = readContentAndClose(response.getContent());
+    		      return content;
+    	} catch (IOException e) {
+    		  throw new IllegalStateException(e);
+    	}
+    }
 
-    private String createAuthToken() {
+    @Override
+    public void createAuthToken() {
         String url = baseURL + "authentication?username=" + userName + "&password=" + password;
         try {
             SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
@@ -69,7 +108,7 @@ public class MifosRestClient implements RestClient {
             logger.info("Status: "+response.getStatus());
             String content = readContentAndClose(response.getContent());
             AuthToken auth = new Gson().fromJson(content, AuthToken.class);
-            return auth.getBase64EncodedAuthenticationKey();
+            authToken = auth.getBase64EncodedAuthenticationKey();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -1,7 +1,6 @@
 package org.openmf.mifos.dataimport.web;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.servlet.ServletException;
@@ -10,32 +9,46 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.populator.WorkbookPopulator;
+import org.openmf.mifos.dataimport.populator.WorkbookPopulatorFactory;
 
 @WebServlet(name = "DownloadServiceServlet", urlPatterns = {"/download"})
 public class DownloadServiceServlet extends HttpServlet {
+	
 	private static final long serialVersionUID = 2L;
 	
-	private static final Logger logger = LoggerFactory.getLogger(DownloadServiceServlet.class);
+	private Workbook workbook;
     
 	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		String fileName=request.getParameter("type")+"-"+request.getParameter("documentType");
-		logger.info(fileName);
+		String fileName=request.getParameter("template");
+		try{
+		WorkbookPopulator populator = WorkbookPopulatorFactory.createWorkbookPopulator(fileName);
+        downloadAndPopulate(populator);
+		fileName=fileName+".xls";
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment;filename="+fileName);
-		InputStream is = this.getClass().getResourceAsStream("/office/"+fileName);
-		int read=0;
-		byte[] bytes = new byte[30000];
-		OutputStream os = response.getOutputStream();
+		writeToStream(response.getOutputStream());
 		
-		while((read = is.read(bytes))!= -1){
-			os.write(bytes, 0, read);
+		}catch(Exception e){
+			throw new ServletException("Cannot download template. " + fileName, e);
 		}
-		os.flush();
-		os.close();	
 	}
+	
+	void downloadAndPopulate(WorkbookPopulator populator) throws IOException {
+        populator.downloadAndParse();
+        workbook = new HSSFWorkbook();
+        populator.populate(workbook);
+    }
+	
+	 void writeToStream(OutputStream stream) throws IOException {
+	             workbook.write(stream);
+	        stream.flush();
+	        stream.close();
+	    }
+
 
 }

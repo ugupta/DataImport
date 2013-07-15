@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport;
+package org.openmf.mifos.dataimport.handler;
 
 import java.util.ArrayList;
 import java.util.List;

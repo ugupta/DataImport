@@ -2,7 +2,6 @@ package org.openmf.mifos.dataimport;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,7 +33,6 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
     @Override
     public Result parse() {
         Result result = new Result();
-        Locale locale = Locale.ENGLISH;
         Integer noOfEntries = getNumberOfRows();
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
@@ -44,7 +42,7 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
                 Integer parentId = readAsInt(PARENT_ID_COL, row);
                 String officeName = readAsString(OFFICE_NAME_COL, row);
                 String openingDate = readAsDate(OPENING_DATE_COL, row);
-                offices.add(new Office(officeName, parentId.toString(), externalId, openingDate, locale, rowIndex));
+//                offices.add(new Office(officeName, parentId.toString(), externalId, openingDate, rowIndex));
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -56,6 +54,7 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
     @Override
     public Result upload() {
         Result result = new Result();
+        client.createAuthToken();
         for (Office office : offices) {
             try {
                 Gson gson = new Gson();
@@ -63,12 +62,12 @@ public class OfficeDataImportHandler extends AbstractDataImportHandler {
                 logger.info(payload);
                 client.post("offices", payload);
             } catch (Exception e) {
-                logger.error("row = " + office.getRowIndex(), e);
-                result.addError("Row = " + office.getRowIndex() + " ," + e.getMessage());
+                logger.error("CHECK" , e);
+                result.addError("Error : " + e.getMessage());
             }
 
         }
-        return null;
+        return result;
     }
     
     public List<Office> getOffices() {

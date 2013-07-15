@@ -11,27 +11,12 @@
 	Data Import  
 </h3>
 <div id="container">
-
-	<form method="post" action="download" >
-	Select Document Format: &nbsp;&nbsp;&nbsp;
-    <select name="documentType">
-    <option value="ms-2007-10.xlsx">Microsoft Excel 2007-2010</option>
-    <option value="ms-97-2003.xls">Microsoft Excel 97-2003</option>
-    <option value="ms-95.xls">Microsoft Excel 95</option>
-    <option value="ms-5.0.xls">Microsoft Excel 5.0</option>
-    <option value="ods.ods">Open Document Spreadsheet</option>
-    </select>
-    <br/>
-     Select Entity: &nbsp;&nbsp;&nbsp;
-    <select name="type">
-    <option value="office">Offices</option>
-    <option value="staff">Staff</option>
-    <option value="client">Clients</option>
-    <option value="loanProducts">Loan Products</option>
-    <option value="loanAccounts">Loan Accounts</option>
-    </select>
-    <br/>
-   <input type="submit" id="downloadSheet" value="Download"  />
+<br>
+  <h4>Step 1 :</h4> Enter your offices through the front-end app provided with MifosX.
+  <h4>Step 2 :</h4> Download template to help facilitate Client Import.
+    <form method="get" action="download" >
+     <input type="hidden" name="template" value="client" > 
+     <input type="submit" value="Download"  />
     </form>
 	<form method="post" action="import" enctype="multipart/form-data">
             <input type="file" name="file"/>

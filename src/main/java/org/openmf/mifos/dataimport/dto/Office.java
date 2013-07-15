@@ -1,62 +1,64 @@
 package org.openmf.mifos.dataimport.dto;
 
-import java.util.Locale;
-
+import java.util.ArrayList;
+import com.google.gson.annotations.SerializedName;
 
 public class Office {
     
-    private final transient Integer rowIndex;
+	@SerializedName("id")
+    private final Integer id;
     
+	@SerializedName("name")
     private final String name;
     
-    private final String parentId;
-    
-    private final String dateFormat="dd MMMM yyyy";
-    
-    private final Locale locale;
-    
-    private final String openingDate;
-    
+	@SerializedName("externalId")
     private final String externalId;
+    
+	@SerializedName("openingDate")
+    private final ArrayList<Integer> openingDate;
+    
+	@SerializedName("parentName")
+    private final String parentName;
+	
+	@SerializedName("hierarchy")
+    private final String hierarchy;
 
-    public Office(String name, String parentId, String externalId, String openingDate, Locale locale, Integer rowIndex ) {
-        if(name == null || name.trim().equals("")) {
-            throw new IllegalArgumentException("name can not be empty");
-        }
+    public Office(Integer id, String name, String externalId, ArrayList<Integer> openingDate, String parentName, String hierarchy ) {
+        this.id = id;
         this.name = name;
-        this.parentId = parentId;
+        this.parentName = parentName;
         this.externalId = externalId;
         this.openingDate = openingDate;
-        this.rowIndex = rowIndex;
-        this.locale = locale;
+        this.hierarchy = hierarchy;
+    }
+    
+    @Override
+	public String toString() {
+	   return "OfficeObject [id=" + id + ", name=" + name + ", externalId=" + externalId + ", openingDate=" + openingDate + ", parentName=" + parentName + "]";
+	}
+    
+    public Integer getId() {
+    	return this.id;
     }
 
     public String getName() {
         return this.name;
     }
 
-    public String getParentId() {
-        return this.parentId;
+    public String getParentName() {
+        return this.parentName;
     }
 
     public String getExternalId() {
         return this.externalId;
     }
 
-    public String getOpeningDate() {
+    public ArrayList<Integer> getOpeningDate() {
         return this.openingDate;
     }
     
-    public Locale getLocale() {
-    	return locale;
-    }
-    
-    public String getDateFormat() {
-    	return dateFormat;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
+    public String getHierarchy() {
+        return this.hierarchy;
     }
 
 }
