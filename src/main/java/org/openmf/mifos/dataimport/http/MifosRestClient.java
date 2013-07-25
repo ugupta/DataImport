@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
+import javax.net.ssl.SSLSession;
+
 import org.openmf.mifos.dataimport.dto.AuthToken;
 import org.openmf.mifos.dataimport.http.SimpleHttpRequest.Method;
 import org.slf4j.Logger;
@@ -28,24 +30,24 @@ public class MifosRestClient implements RestClient {
 
     private String authToken;
     
-//    static {
-//	    //for localhost testing only
-//	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-//	    new javax.net.ssl.HostnameVerifier(){
-//
-//	    	@Override
-//	        public boolean verify(String hostname, @SuppressWarnings("unused") SSLSession sslSession) {
-//	            if (hostname.equals("localhost")) {
-//	                return true;
-//	            }
-//	            return false;
-//	        }
-//	    });
-//	}
+    static {
+	    //for localhost testing only
+	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+	    new javax.net.ssl.HostnameVerifier(){
+
+	    	@Override
+	        public boolean verify(String hostname, @SuppressWarnings("unused") SSLSession sslSession) {
+	            if (hostname.equals("localhost")) {
+	                return true;
+	            }
+	            return false;
+	        }
+	    });
+	}
     
     public MifosRestClient() {
     	
-        baseURL = "https://demo.openmf.org/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
+        baseURL = "https://localhost:8443/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
         userName = "mifos"; // System.getProperty("mifos.user.id");
         password = "password"; // System.getProperty("mifos.password");
         tenantId = "default"; // System.getProperty("mifos.tenant.id");

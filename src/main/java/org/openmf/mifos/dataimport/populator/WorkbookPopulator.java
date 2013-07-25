@@ -1,11 +1,12 @@
 package org.openmf.mifos.dataimport.populator;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.handler.Result;
 
 public interface WorkbookPopulator {
 
-    void downloadAndParse();
+    Result downloadAndParse();
     
-    void populate(Workbook workbook);
+    Result populate(Workbook workbook);
 
 }

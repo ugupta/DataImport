@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Client;
+import org.openmf.mifos.dataimport.dto.CorporateClient;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ClientDataImportHandler.class);
 	
 	public static final int FIRST_NAME_COL = 0;
+	public static final int FULL_NAME_COL = 0;
     public static final int LAST_NAME_COL = 1;
     public static final int MIDDLE_NAME_COL = 2;
     public static final int OFFICE_NAME_COL = 3;
@@ -27,6 +29,8 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     public static final int ACTIVE_COL = 7;
 
     private List<Client> clients = new ArrayList<Client>();
+    private List<CorporateClient> corporateClients = new ArrayList<CorporateClient>();
+    private String clientType;
     
     private final RestClient restClient;
     
@@ -42,13 +46,14 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet clientSheet = workbook.getSheet("Clients");
         Integer noOfEntries = getNumberOfRows(clientSheet);
+        if(readAsString(FIRST_NAME_COL, clientSheet.getRow(0)).equals("First Name*"))
+        	clientType = "Individual";
+        else
+        	clientType = "Corporate";
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
                 row = clientSheet.getRow(rowIndex);
-                String firstName = readAsString(FIRST_NAME_COL, row);
-                String lastName = readAsString(LAST_NAME_COL, row);
-                String middleName = readAsString(MIDDLE_NAME_COL, row);
                 String officeName = readAsString(OFFICE_NAME_COL, row);
                 String officeId = getIdByName(workbook.getSheet("Offices"), officeName).toString();
                 String staffName = readAsString(STAFF_NAME_COL, row);
@@ -56,7 +61,16 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                 String externalId = readAsString(EXTERNAL_ID_COL, row);
                 String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
                 String active = readAsBoolean(ACTIVE_COL, row).toString();
-                clients.add(new Client ( firstName, lastName, middleName, activationDate, active, externalId, officeId, staffId, rowIndex));
+                if(clientType.equals("Individual")) {
+                    String firstName = readAsString(FIRST_NAME_COL, row);
+                    String lastName = readAsString(LAST_NAME_COL, row);
+                    String middleName = readAsString(MIDDLE_NAME_COL, row);
+                    clients.add(new Client ( firstName, lastName, middleName, activationDate, active, externalId, officeId, staffId, rowIndex));
+                  } else {
+                    String fullName = readAsString(FULL_NAME_COL, row);
+                    corporateClients.add(new CorporateClient(fullName, activationDate, active, externalId, officeId, staffId, rowIndex));
+                  }
+                
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -70,6 +84,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     public Result upload() {
         Result result = new Result();
         restClient.createAuthToken();
+        if(clientType.equals("Individual"))
         for (Client client : clients) {
             try {
                 Gson gson = new Gson();
@@ -80,12 +95,28 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                 logger.error("row = " + client.getRowIndex(), e);
                 result.addError("Row = " + client.getRowIndex() + " ," + e.getMessage());
             }
-
+        }
+        else {
+        	for (CorporateClient corporateClient : corporateClients) {
+                try {
+                    Gson gson = new Gson();
+                    String payload = gson.toJson(corporateClient);
+                    logger.info(payload);
+                    restClient.post("clients", payload);
+                } catch (Exception e) {
+                    logger.error("row = " + corporateClient.getRowIndex(), e);
+                    result.addError("Row = " + corporateClient.getRowIndex() + " ," + e.getMessage());
+                }
+            }
         }
         return result;
     }
     
     public List<Client> getClients() {
         return clients;
+    }
+    
+    public List<CorporateClient> getCorporateClients() {
+        return corporateClients;
     }
 }

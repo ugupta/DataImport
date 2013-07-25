@@ -1,6 +1,9 @@
 package org.openmf.mifos.dataimport.http;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,7 +40,13 @@ public class SimpleHttpRequest {
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(),"UTF-8");
             out.write(content);
             close(out);
-            logger.info(connection.getResponseMessage());
+            InputStream developerMessage = null;
+            if (connection.getResponseCode() >= 400) {
+                developerMessage = connection.getErrorStream();
+            } else {
+                developerMessage = connection.getInputStream();
+            }
+            logger.info(new BufferedReader(new InputStreamReader(developerMessage)).readLine());
         }
     }
 

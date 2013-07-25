@@ -1,13 +1,17 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.dto.Office;
 import org.openmf.mifos.dataimport.dto.Personnel;
+import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,64 +31,133 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private List<Personnel> personnel = new ArrayList<Personnel>();
 	
-	public static final int ID_COL = 0;
-	public static final int FULL_NAME_COL = 1;
-	public static final int OFFICE_ID_COL = 2;
-	public static final int OFFICE_NAME_COL = 3;
+	//Maintaining the one to many relationship
+	private Map<String, ArrayList<String>> officeToPersonnel;
+	public static Map<String, Integer> nameToId;
+	
+	public Map<Integer, Integer> lastColumnLetters;
+	
+	public static final int OFFICE_NAME_COL = 0;
+	public static final int STAFF_LIST_START_COL = 1;
+	public static final int NOTICE_COL = 2;
 	
 	public PersonnelSheetPopulator(RestClient client) {
         this.client = client;
     }
 	
 	 @Override
-	    public void downloadAndParse() {
-	        client.createAuthToken();
+	    public Result downloadAndParse() {
+	        Result result = new Result();
 	        try {
+	        	client.createAuthToken();
 	            content = client.get("staff");
 	            Gson gson = new Gson();
 	            JsonElement json = new JsonParser().parse(content);
 	            JsonArray array = json.getAsJsonArray();
 	            Iterator<JsonElement> iterator = array.iterator();
+	            nameToId = new HashMap<String, Integer>();
 	            while(iterator.hasNext()) {
 	            	JsonElement json2 = iterator.next();
 	            	Personnel person = gson.fromJson(json2, Personnel.class);
 	            	personnel.add(person);
+	            	nameToId.put(person.getFirstName() + " " +person.getLastName(), person.getId());
 	            	logger.info("CHECK : " + person.toString());
 	            }
 	        } catch (Exception e) {
-	            
+	            result.addError(e.getMessage());
+	            logger.error(e.getMessage());
 	        }
+	        return result;
 	    }
 
 	    @Override
-	    public void populate(Workbook workbook) {
-	        int rowIndex = 1;
+	    public Result populate(Workbook workbook) {
+	    	Result result = new Result();
+	    	try{
+	        int rowIndex = 1, officeIndex = 0;
 	        Sheet staffSheet = workbook.createSheet("Staff");
+	        
 	        setLayout(staffSheet);
-	        for(Personnel person:personnel) {
-	        	if(person.isLoanOfficer()) {
+	        
+	        setOfficeToPersonnelMap();
+	        
+	        List<Office> offices = OfficeSheetPopulator.offices;
+	        lastColumnLetters = new HashMap<Integer, Integer>();
+	        for(Office office : offices) {
 	        	Row row = staffSheet.createRow(rowIndex);
-	        	writeInt(ID_COL, row, person.getId());
-	        	writeString(FULL_NAME_COL, row, person.getFirstName() + " " + person.getLastName());
-	        	writeInt(OFFICE_ID_COL, row, person.getOfficeId());
-	        	writeString(OFFICE_NAME_COL, row, person.getOfficeName());
+	        	writeString(OFFICE_NAME_COL, row, office.getName());
+	        	
+	        	Integer colIndex = 0;
+	        	ArrayList<String> fullStaffList = getStaffList(office.getHierarchy());
+	        	ArrayList<Integer> staffIdList = new ArrayList<Integer> ();
+	        	if(!fullStaffList.isEmpty())
+	        		for(String staffName : fullStaffList) {
+	        			staffIdList.add(nameToId.get(staffName));
+	        			colIndex++;
+	        		    writeString(colIndex, row, staffName);
+	        		}
+	        	row = staffSheet.createRow(++rowIndex);	
+	        	colIndex=0;
+	        	    for(Integer staffId : staffIdList) {
+	        	    	writeInt(++colIndex, row, staffId);
+	        	    }
+	        	lastColumnLetters.put(officeIndex++, colIndex);
 	        	rowIndex++;
-	        	}
 	        }
 	        staffSheet.protectSheet("");
+	    	} catch (Exception e) {
+	    		result.addError(e.getMessage());
+	    		logger.error(e.getMessage());
+	    	}
+	        return result;
 	    }
 	    
-	    public void setLayout(Sheet worksheet) {
-	    	worksheet.setColumnWidth(0, 3000);
-	        worksheet.setColumnWidth(1, 7000);
-	        worksheet.setColumnWidth(2, 3000);
-	        worksheet.setColumnWidth(3, 7000);
+	    private void setOfficeToPersonnelMap() {
+	    	officeToPersonnel = new HashMap<String, ArrayList<String>>();
+	    	for(Personnel person : personnel) {
+	    		add(person.getOfficeName(), person.getFirstName() + " " + person.getLastName());
+	    	}
+	    }
+	    
+	    //Guava Multi-map can reduce this.
+	    private void add(String key, String value) {
+	        ArrayList<String> values = officeToPersonnel.get(key);
+	        if (values == null) {
+	            values = new ArrayList<String>();
+	        }
+	        values.add(value);
+	        officeToPersonnel.put(key, values);
+	    }
+	    
+	    private ArrayList<String> getStaffList(String hierarchy) {
+	    	ArrayList<String> fullStaffList = new ArrayList<String>();
+	    	Integer hierarchyLength = hierarchy.length();
+			String[] officeIds = hierarchy.substring(1, hierarchyLength).split("\\.");
+			if(officeToPersonnel.containsKey("Head Office"))
+			    fullStaffList.addAll(officeToPersonnel.get("Head Office"));
+			if(officeIds[0].isEmpty())
+				return fullStaffList;
+			for(int i=0; i<officeIds.length; i++) {
+				String officeName = getOfficeNameFromOfficeId(Integer.parseInt(officeIds[i]));
+				if(officeToPersonnel.containsKey(officeName))
+	    	        fullStaffList.addAll(officeToPersonnel.get(officeName));
+			}
+	    	return fullStaffList;
+	    }
+	    
+	    private String getOfficeNameFromOfficeId(Integer officeId) {
+	    	return OfficeSheetPopulator.idToName.get(officeId);
+	    }
+	    
+	    
+	    private void setLayout(Sheet worksheet) {
+	    	for(Integer i=0; i<100; i++)
+	    		worksheet.setColumnWidth(i, 6000);
 	        Row rowHeader = worksheet.createRow(0);
 	        rowHeader.setHeight((short)500);
-	        writeString(ID_COL,rowHeader, "ID");
-	        writeString(FULL_NAME_COL, rowHeader, "Name");
-	        writeString(OFFICE_ID_COL, rowHeader, "Office ID");
 	        writeString(OFFICE_NAME_COL, rowHeader, "Office Name");
+	        writeString(STAFF_LIST_START_COL, rowHeader, "Staff List");
+	        writeString(NOTICE_COL, rowHeader, "Every alternating Row consists of corresponding Staff IDs.");
 	    }
 	    
 	    public List<Personnel> getPersonnel() {
@@ -98,8 +171,15 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	    public String[] getPersonnelNames() {
 	    	List<String> personnelNameList = new ArrayList<String>();
 	    	for (int i = 0; i < personnel.size(); i++)
-	    		if(personnel.get(i).isLoanOfficer())
 	    		  personnelNameList.add(personnel.get(i).getFirstName() + " " + personnel.get(i).getLastName()); 
 	    	return personnelNameList.toArray(new String[personnelNameList.size()]);
+	    }
+	    
+	    public Map<String, ArrayList<String>> getOfficeToPersonnel() {
+	    	return officeToPersonnel;
+	    }
+	    
+	    public Map<Integer, Integer> getLastColumnLetters() {
+	    	return lastColumnLetters;
 	    }
 }

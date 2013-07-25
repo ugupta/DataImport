@@ -16,9 +16,22 @@
   <h4>Step 2 :</h4> Download template to help facilitate Client Import.
     <form method="get" action="download" >
      <input type="hidden" name="template" value="client" > 
+     Select Client Type :<br/> <br/>
+     <input type="radio" name="clientType" value="individual"> Individual
+     <input type="radio" name="clientType" value="corporate"> Corporate <br/><br/>
      <input type="submit" value="Download"  />
     </form>
 	<form method="post" action="import" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+	</form>
+	<h4>Step 3 :</h4> Enter your Currency Configuration, Funds, Charges and Loan Product configuration through the front-end app provided with MifosX.
+	<h4>Step 4 :</h4> Download template to help facilitate Loan Import.
+	<form method="get" action="download" >
+     <input type="hidden" name="template" value="loan" > 
+     <input type="submit" value="Download"  />
+    </form>
+    <form method="post" action="import" enctype="multipart/form-data">
             <input type="file" name="file"/>
             <input type="submit"/>
 	</form>

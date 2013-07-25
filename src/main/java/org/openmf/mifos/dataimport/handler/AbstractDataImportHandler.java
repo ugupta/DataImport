@@ -13,7 +13,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         Integer noOfEntries = 1;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
         // sometimes.
-        while (sheet.getRow(noOfEntries) != null) {
+        while (sheet.getRow(noOfEntries).getCell(0) != null) {
             noOfEntries++;
         }
         return noOfEntries;
@@ -43,12 +43,14 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     	return row.getCell(colIndex).getBooleanCellValue();
     }
     
-    protected Integer getIdByName (Sheet sheet, String name) {
+    public Integer getIdByName (Sheet sheet, String name) {
     	for (Row row : sheet) {
             for (Cell cell : row) {
                 if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
                     if (cell.getRichStringCellValue().getString().trim().equals(name)) {
-                        return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();  
+                    	if(sheet.getSheetName().equals("Offices"))
+                            return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();  
+                        return ((Double)sheet.getRow(row.getRowNum() + 1).getCell(cell.getColumnIndex()).getNumericCellValue()).intValue();
                     }
                 }
             }

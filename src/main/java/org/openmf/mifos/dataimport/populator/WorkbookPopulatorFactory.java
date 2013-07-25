@@ -7,11 +7,12 @@ import org.openmf.mifos.dataimport.http.MifosRestClient;
 public class WorkbookPopulatorFactory {
 	
 	
-	  public static final WorkbookPopulator createWorkbookPopulator(String template) throws IOException {
+	  public static final WorkbookPopulator createWorkbookPopulator(String parameter, String template) throws IOException {
             
-	        if(template.trim().equals("client")) {
-	             return new ClientWorkbookPopulator (new MifosRestClient());
-	        }
+	        if(template.trim().equals("client")) 
+	             return new ClientWorkbookPopulator (parameter, new MifosRestClient());
+	        else if(template.trim().equals("loan"))
+	        	 return new LoanWorkbookPopulator(new MifosRestClient());
 	        throw new IllegalArgumentException(" Check ");
 	    }
 

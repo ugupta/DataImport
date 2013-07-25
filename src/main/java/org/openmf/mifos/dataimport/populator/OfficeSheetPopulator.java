@@ -1,14 +1,17 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Office;
+import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +29,9 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private String content;
 	
-	private List<Office> offices = new ArrayList<Office>();
+	public static List<Office> offices;
+	
+	public static Map<Integer,String> idToName;
 	
 	public static final int ID_COL = 0;
 	public static final int OFFICE_NAME_COL = 1;
@@ -40,28 +45,36 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
     }
     
     @Override
-    public void downloadAndParse() {
-        client.createAuthToken();
+    public Result downloadAndParse() {
+    	Result result = new Result();
         try {
+        	client.createAuthToken();
+        	offices = new ArrayList<Office>();
             content = client.get("offices");
             Gson gson = new Gson();
-            logger.info(content);
+//            logger.info(content);
             JsonElement json = new JsonParser().parse(content);
             JsonArray array = json.getAsJsonArray();
             Iterator<JsonElement> iterator = array.iterator();
+            idToName = new HashMap<Integer,String>();
             while(iterator.hasNext()) {
             	JsonElement json2 = iterator.next();
             	Office office = gson.fromJson(json2, Office.class);
+            	idToName.put(office.getId(), office.getName());
             	offices.add(office);
-            	logger.info("CHECK : "+office.toString());
+//            	logger.info("CHECK : "+office.toString());
             }
         } catch (Exception e) {
-            
+            result.addError(e.getMessage());
+//            logger.error(e.getMessage());
         }
+        return result;
     }
 
     @Override
-    public void populate(Workbook workbook) {
+    public Result populate(Workbook workbook) {
+    	Result result = new Result();
+    	try{
         int rowIndex = 1;
         Sheet officeSheet = workbook.createSheet("Offices");
         setLayout(officeSheet);
@@ -71,17 +84,22 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         for(Office office:offices) {
         	Row row = officeSheet.createRow(rowIndex);
         	writeInt(ID_COL, row, office.getId());
-        	writeString(OFFICE_NAME_COL, row, office.getName());
+        	writeString(OFFICE_NAME_COL, row, office.getName().trim().replaceAll("[ )(]", "_"));
         	writeString(EXTERNAL_ID_COL, row, office.getExternalId());
-        	writeDate(OPENING_DATE_COL, row, ""+office.getOpeningDate().get(1)+"/"+office.getOpeningDate().get(2)+"/"+office.getOpeningDate().get(0), dateCellStyle);
+        	writeDate(OPENING_DATE_COL, row, office.getOpeningDate().get(2) + "/" + office.getOpeningDate().get(1) + "/" + office.getOpeningDate().get(0), dateCellStyle);
         	writeString(PARENT_NAME_COL,row,office.getParentName());
         	writeString(HIERARCHY_COL, row, office.getHierarchy());
         	rowIndex++;
         }
         officeSheet.protectSheet("");
+    	} catch (Exception e) {
+    		result.addError(e.getMessage());
+    		logger.error(e.getMessage());
+    	}
+        return result;
     }
     
-    public void setLayout(Sheet worksheet) {
+    private void setLayout(Sheet worksheet) {
     	worksheet.setColumnWidth(0, 2000);
         worksheet.setColumnWidth(1, 7000);
         worksheet.setColumnWidth(2, 7000);
@@ -98,19 +116,6 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         writeString(HIERARCHY_COL, rowHeader, "Hierarchy");
     }
     
-    public List<Office> getOffices() {
-        return offices;
-    }
-    
-    public Integer getOfficeSize() {
-    	return offices.size();
-    }
-    
-    public String[] getOfficeNames() {
-    	String[] officeNameList = new String[offices.size()];
-    	for (int i = 0; i < offices.size(); i++)
-    		officeNameList[i] = offices.get(i).getName();
-    	return officeNameList;
-    }
+ 
 
 }

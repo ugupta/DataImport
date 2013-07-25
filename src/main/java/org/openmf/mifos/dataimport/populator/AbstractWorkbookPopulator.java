@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -19,8 +20,16 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
 	    protected void writeDate(int colIndex, Row row, String value, CellStyle dateCellStyle) {
 	    	try {
-	    	    Date date = new SimpleDateFormat("mm/dd/yyyy", Locale.ENGLISH).parse(value);
-	    	    row.createCell(colIndex).setCellValue(date);
+	    		//To make validation between functions inclusive.
+	    	    Date date = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(value);
+	    		Calendar cal = Calendar.getInstance();
+	    		cal.setTime(date);
+	    	    cal.set(Calendar.HOUR_OF_DAY, 0);
+	    	    cal.set(Calendar.MINUTE, 0);
+	    	    cal.set(Calendar.SECOND, 0);
+	    	    cal.set(Calendar.MILLISECOND, 0);
+	    	    Date dateWithoutTime = cal.getTime();
+	    	    row.createCell(colIndex).setCellValue(dateWithoutTime);
 	    	    row.getCell(colIndex).setCellStyle(dateCellStyle);
 	    	    } catch (Exception e) {
 	    	    	throw new IllegalArgumentException("ParseException");
