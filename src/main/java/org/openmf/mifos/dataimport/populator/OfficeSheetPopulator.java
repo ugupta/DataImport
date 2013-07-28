@@ -29,9 +29,9 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private String content;
 	
-	public static List<Office> offices;
+	private List<Office> offices;
 	
-	public static Map<Integer,String> idToName;
+	private Map<Integer,String> idToName;
 	
 	public static final int ID_COL = 0;
 	public static final int OFFICE_NAME_COL = 1;
@@ -58,15 +58,15 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
             Iterator<JsonElement> iterator = array.iterator();
             idToName = new HashMap<Integer,String>();
             while(iterator.hasNext()) {
-            	JsonElement json2 = iterator.next();
-            	Office office = gson.fromJson(json2, Office.class);
+            	json = iterator.next();
+            	Office office = gson.fromJson(json, Office.class);
             	idToName.put(office.getId(), office.getName());
             	offices.add(office);
-//            	logger.info("CHECK : "+office.toString());
+            	logger.info("CHECK : "+office.toString());
             }
         } catch (Exception e) {
             result.addError(e.getMessage());
-//            logger.error(e.getMessage());
+            logger.error(e.getMessage());
         }
         return result;
     }
@@ -100,12 +100,12 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
     }
     
     private void setLayout(Sheet worksheet) {
-    	worksheet.setColumnWidth(0, 2000);
-        worksheet.setColumnWidth(1, 7000);
-        worksheet.setColumnWidth(2, 7000);
-        worksheet.setColumnWidth(3, 4000);
-        worksheet.setColumnWidth(4, 7000);
-        worksheet.setColumnWidth(5, 6000);
+    	worksheet.setColumnWidth(ID_COL, 2000);
+        worksheet.setColumnWidth(OFFICE_NAME_COL, 7000);
+        worksheet.setColumnWidth(EXTERNAL_ID_COL, 7000);
+        worksheet.setColumnWidth(OPENING_DATE_COL, 4000);
+        worksheet.setColumnWidth(PARENT_NAME_COL, 7000);
+        worksheet.setColumnWidth(HIERARCHY_COL, 6000);
         Row rowHeader = worksheet.createRow(0);
         rowHeader.setHeight((short)500);
         writeString(ID_COL, rowHeader, "ID");
@@ -114,6 +114,10 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         writeString(OPENING_DATE_COL, rowHeader, "Opening Date");
         writeString(PARENT_NAME_COL, rowHeader, "Parent Name");
         writeString(HIERARCHY_COL, rowHeader, "Hierarchy");
+    }
+    
+    public List<Office> getOffices() {
+        return offices;
     }
     
  

@@ -54,7 +54,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     @Override
     public Result downloadAndParse() {
     	officeSheetPopulator = new OfficeSheetPopulator(client);
-        personnelSheetPopulator = new PersonnelSheetPopulator(client);
+        personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.FALSE, client);
     	Result result = officeSheetPopulator.downloadAndParse();
     	if(result.isSuccess()) {
     	   result = personnelSheetPopulator.downloadAndParse();
@@ -117,7 +117,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     	CellStyle dateCellStyle = workbook.createCellStyle();
         short df = workbook.createDataFormat().getFormat("dd/mm/yy");
         dateCellStyle.setDataFormat(df);
-    	List<Office> offices = OfficeSheetPopulator.offices;
+    	List<Office> offices = officeSheetPopulator.getOffices();
     	for(Office office:offices) {
         	Row row = clientSheet.createRow(rowIndex);
         	writeString(RELATIONAL_OFFICE_NAME_COL, row, office.getName().trim().replaceAll("[ )(]", "_"));
@@ -142,7 +142,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
     	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
     	Workbook clientWorkbook = worksheet.getWorkbook();
-    	List<Office> offices = OfficeSheetPopulator.offices;
+    	List<Office> offices = officeSheetPopulator.getOffices();
 
     	Name officeGroup = clientWorkbook.createName();
     	officeGroup.setNameName("Office");

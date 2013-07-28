@@ -26,22 +26,26 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
     private static final Logger logger = LoggerFactory.getLogger(PersonnelSheetPopulator.class);
 	
 	private final RestClient client;
+	private final Boolean onlyLoanOfficers;
 	
 	private String content;
 	
 	private List<Personnel> personnel = new ArrayList<Personnel>();
+	private List<Office> offices;
 	
 	//Maintaining the one to many relationship
 	private Map<String, ArrayList<String>> officeToPersonnel;
-	public static Map<String, Integer> nameToId;
+	public Map<String, Integer> nameToId;
 	
 	public Map<Integer, Integer> lastColumnLetters;
+	private Map<Integer,String> idToName;
 	
 	public static final int OFFICE_NAME_COL = 0;
 	public static final int STAFF_LIST_START_COL = 1;
 	public static final int NOTICE_COL = 2;
 	
-	public PersonnelSheetPopulator(RestClient client) {
+	public PersonnelSheetPopulator(Boolean onlyLoanOfficers, RestClient client) {
+		this.onlyLoanOfficers = onlyLoanOfficers;
         this.client = client;
     }
 	
@@ -57,11 +61,29 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	            Iterator<JsonElement> iterator = array.iterator();
 	            nameToId = new HashMap<String, Integer>();
 	            while(iterator.hasNext()) {
-	            	JsonElement json2 = iterator.next();
-	            	Personnel person = gson.fromJson(json2, Personnel.class);
-	            	personnel.add(person);
+	            	json = iterator.next();
+	            	Personnel person = gson.fromJson(json, Personnel.class);
+	            	if(!onlyLoanOfficers)
+	            	    personnel.add(person);
+	            	else{
+	            	   if(person.isLoanOfficer())
+	            		   personnel.add(person);
+	            	}
 	            	nameToId.put(person.getFirstName() + " " +person.getLastName(), person.getId());
 	            	logger.info("CHECK : " + person.toString());
+	            }
+	            offices = new ArrayList<Office>();
+	            content = client.get("offices");
+	            json = new JsonParser().parse(content);
+	            array = json.getAsJsonArray();
+	            iterator = array.iterator();
+	            idToName = new HashMap<Integer,String>();
+	            while(iterator.hasNext()) {
+	            	json = iterator.next();
+	            	Office office = gson.fromJson(json, Office.class);
+	            	idToName.put(office.getId(), office.getName());
+	            	offices.add(office);
+	            	logger.info("CHECK : "+office.toString());
 	            }
 	        } catch (Exception e) {
 	            result.addError(e.getMessage());
@@ -81,11 +103,10 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	        
 	        setOfficeToPersonnelMap();
 	        
-	        List<Office> offices = OfficeSheetPopulator.offices;
 	        lastColumnLetters = new HashMap<Integer, Integer>();
 	        for(Office office : offices) {
 	        	Row row = staffSheet.createRow(rowIndex);
-	        	writeString(OFFICE_NAME_COL, row, office.getName());
+	        	writeString(OFFICE_NAME_COL, row, office.getName().replaceAll("[ )(]", "_"));
 	        	
 	        	Integer colIndex = 0;
 	        	ArrayList<String> fullStaffList = getStaffList(office.getHierarchy());
@@ -146,7 +167,7 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	    }
 	    
 	    private String getOfficeNameFromOfficeId(Integer officeId) {
-	    	return OfficeSheetPopulator.idToName.get(officeId);
+	    	return idToName.get(officeId);
 	    }
 	    
 	    
@@ -166,13 +187,6 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	    
 	    public Integer getPersonnelSize() {
 	    	return personnel.size();
-	    }
-	    
-	    public String[] getPersonnelNames() {
-	    	List<String> personnelNameList = new ArrayList<String>();
-	    	for (int i = 0; i < personnel.size(); i++)
-	    		  personnelNameList.add(personnel.get(i).getFirstName() + " " + personnel.get(i).getLastName()); 
-	    	return personnelNameList.toArray(new String[personnelNameList.size()]);
 	    }
 	    
 	    public Map<String, ArrayList<String>> getOfficeToPersonnel() {
