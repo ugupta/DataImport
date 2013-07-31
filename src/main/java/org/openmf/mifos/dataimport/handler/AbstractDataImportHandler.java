@@ -44,17 +44,34 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
     
     public Integer getIdByName (Sheet sheet, String name) {
+    	String sheetName = sheet.getSheetName();
+    	if(sheetName.equals("Offices") || sheetName.equals("Clients") || sheetName.equals("Staff") || sheetName.equals("Funds")) {
     	for (Row row : sheet) {
             for (Cell cell : row) {
                 if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
                     if (cell.getRichStringCellValue().getString().trim().equals(name)) {
                     	if(sheet.getSheetName().equals("Offices"))
-                            return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();  
-                        return ((Double)sheet.getRow(row.getRowNum() + 1).getCell(cell.getColumnIndex()).getNumericCellValue()).intValue();
+                            return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue(); 
+                    	else if(sheet.getSheetName().equals("Staff") || sheet.getSheetName().equals("Clients"))
+                           return ((Double)sheet.getRow(row.getRowNum() + 1).getCell(cell.getColumnIndex()).getNumericCellValue()).intValue();
+                    	else if(sheet.getSheetName().equals("Funds"))
+                    		return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();
                     }
                 }
             }
-        }               
+          }
+    	} else if (sheetName.equals("Products")) {
+    		for(Row row : sheet) {
+    			for(int i = 0; i < 2; i++) {
+    				Cell cell = row.getCell(i);
+    				if(cell.getCellType() == Cell.CELL_TYPE_STRING) {
+    					if(cell.getRichStringCellValue().getString().trim().equals(name)) {
+    						return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();
+    					}
+    				}
+    			}
+    		}
+    	}
         return 0;
     }
 

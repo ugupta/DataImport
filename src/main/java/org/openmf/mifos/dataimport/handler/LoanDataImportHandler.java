@@ -64,12 +64,81 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
             try {
                 row = loanSheet.getRow(rowIndex);
                 String clientName = readAsString(CLIENT_NAME_COL, row);
+                String clientId = getIdByName(workbook.getSheet("Clients"), clientName).toString();
                 String productName = readAsString(PRODUCT_COL, row);
+                String productId = getIdByName(workbook.getSheet("Products"), productName).toString();
                 String loanOfficerName = readAsString(LOAN_OFFICER_NAME_COL, row);
+                String loanOfficerId = getIdByName(workbook.getSheet("Staff"), loanOfficerName).toString();
                 String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
+                String fundName = readAsString(FUND_NAME_COL, row);
+                String fundId;
+                if(fundName.equals(""))
+                	fundId = "";
+                else
+                    fundId = getIdByName(workbook.getSheet("Funds"), fundName).toString();
+                String principal = readAsString(PRINCIPAL_COL, row);
+                String numberOfRepayments = readAsString(NO_OF_REPAYMENTS_COL, row);
+                String repaidEvery = readAsString(REPAID_EVERY_COL, row);
+                String repaidEveryFrequency = readAsString(REPAID_EVERY_FREQUENCY_COL, row);
+                String repaidEveryFrequencyId = "";
+                if(repaidEveryFrequency.equals("Days"))
+                	repaidEveryFrequencyId = "0";
+                else if(repaidEveryFrequency.equals("Weeks"))
+                	repaidEveryFrequencyId = "1";
+                else if(repaidEveryFrequency.equals("Months"))
+                	repaidEveryFrequencyId = "2";
+                String loanTerm = readAsString(LOAN_TERM_COL, row);
+                String loanTermFrequency = readAsString(LOAN_TERM_FREQUENCY_COL, row);
+                String loanTermFrequencyId = "";
+                if(loanTermFrequency.equals("Days"))
+                	loanTermFrequencyId = "0";
+                else if(loanTermFrequency.equals("Weeks"))
+                	loanTermFrequencyId = "1";
+                else if(loanTermFrequency.equals("Months"))
+                	loanTermFrequencyId = "2";
+                String nominalInterestRate = readAsString(NOMINAL_INTEREST_RATE_COL, row);
                 String disbursedDate = readAsDate(DISBURSED_DATE_COL, row);
+                String amortization = readAsString(AMORTIZATION_COL, row);
+                String amortizationId = "";
+                if(amortization.equals("Equal principal payments"))
+                	amortizationId = "0";
+                else if(amortization.equals("Equal Installments"))
+                	amortizationId = "1";
+                String interestMethod = readAsString(INTEREST_METHOD_COL, row);
+                String interestMethodId = "";
+                if(interestMethod.equals("Flat"))
+                	interestMethodId = "1";
+                else if(interestMethod.equals("Declining Balance"))
+                	interestMethodId = "0";
+                String interestCalculationPeriod = readAsString(INTEREST_CALCULATION_PERIOD_COL, row);
+                String interestCalculationPeriodId = "";
+                if(interestCalculationPeriod.equals("Daily"))
+                	interestCalculationPeriodId = "0";
+                else if(interestCalculationPeriod.equals("Same as repayment period"))
+                	interestCalculationPeriodId = "1";
+                String arrearsTolerance = readAsString(ARREARS_TOLERANCE_COL, row);
+                String repaymentStrategy = readAsString(REPAYMENT_STRATEGY_COL, row);
+                String repaymentStrategyId = "";
+                if(repaymentStrategy.equals("Mifos style"))
+                	repaymentStrategyId = "1";
+                else if(repaymentStrategy.equals("Heavensfamily"))
+                	repaymentStrategyId = "2";
+                else if(repaymentStrategy.equals("Creocore"))
+                	repaymentStrategyId = "3";
+                else if(repaymentStrategy.equals("RBI (India)"))
+                	repaymentStrategyId = "4";
+                else if(repaymentStrategy.equals("Principal Interest Penalties Fees Order"))
+                	repaymentStrategyId = "5";
+                else if(repaymentStrategy.equals("Interest Principal Penalties Fees Order"))
+                	repaymentStrategyId = "6";
+                String graceOnPrincipalPayment = readAsString(GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
+                String graceOnInterestPayment = readAsString(GRACE_ON_INTEREST_PAYMENT_COL, row);
+                String graceOnInterestCharged = readAsString(GRACE_ON_INTEREST_CHARGED_COL, row);
                 String interestChargedFromDate = readAsDate(INTEREST_CHARGED_FROM_COL, row);
                 String firstRepaymentOnDate = readAsDate(FIRST_REPAYMENT_COL, row);
+                loans.add(new Loan(clientId, productId, loanOfficerId, submittedOnDate, fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyId, loanTerm,
+                		loanTermFrequencyId, nominalInterestRate, disbursedDate, amortizationId, interestMethodId, interestCalculationPeriodId, arrearsTolerance, repaymentStrategyId,
+                		graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, rowIndex));
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -90,6 +159,8 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 logger.info(payload);
                 restClient.post("loans", payload);
             } catch (Exception e) {
+            	logger.error("row = " + loan.getRowIndex(), e);
+                result.addError("Row = " + loan.getRowIndex() + " ," + e.getMessage());
             }
         }
         return result;

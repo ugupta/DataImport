@@ -59,7 +59,7 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	@Override
     public Result downloadAndParse() {
     	Result result = new Result();
-//        try {
+        try {
         	client.createAuthToken();
         	products = new ArrayList<Product>();
             content = client.get("loanproducts");
@@ -74,17 +74,17 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
             	    products.add(product);
             }
         	
-//        } catch (Exception e) {
-//            result.addError(e.getMessage());
-//            logger.error(e.getMessage());
-//        }
+        } catch (Exception e) {
+            result.addError(e.getMessage());
+            logger.error(e.getMessage());
+        }
         return result;
     }
 	
 	 @Override
 	 public Result populate(Workbook workbook) {
 	    	Result result = new Result();
-//	    	try{
+	    	try{
 	    		int rowIndex = 1;
 	            Sheet productSheet = workbook.createSheet("Products");
 	            setLayout(productSheet);
@@ -138,10 +138,10 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	            	    writeInt(GRACE_ON_INTEREST_CHARGED_COL, row, product.getGraceOnInterestCharged());
 	            	
 	            }
-//	    	} catch (Exception e) {
-//	    		result.addError(e.getMessage());
-//	    		logger.error(e.getMessage());
-//	    	}
+	    	} catch (Exception e) {
+	    		result.addError(e.getMessage());
+	    		logger.error(e.getMessage());
+	    	}
 	        return result;
 	 }
 	 

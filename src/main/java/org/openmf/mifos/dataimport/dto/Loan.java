@@ -4,15 +4,43 @@ import java.util.Locale;
 
 public class Loan {
 
-	private final String amortizationType;
+	private final transient Integer rowIndex;
 	
 	private final String clientId;
 	
-	private final String dateFormat = "dd MMMM yyyy";
+	private final String productId;
+	
+	private final String loanOfficerId;
+	
+	private final String fundId;
+	
+	private final String submittedOnDate;
+	
+	private final String principal;
+	
+    private final String numberOfRepayments;
+	
+	private final String repaymentEvery;
+	
+	private final String repaymentFrequencyType;
+	
+    private final String loanTermFrequency;
+	
+	private final String loanTermFrequencyType;
+	
+	private final String interestRatePerPeriod;
 	
 	private final String expectedDisbursementDate;
 	
-	private final String fundId;
+	private final String amortizationType;
+	
+	private final String interestType;
+	
+	private final String interestCalculationPeriodType;
+	
+	private final String inArrearsTolerance;
+	
+	private final String transactionProcessingStrategyId;
 	
 	private final String graceOnInterestCharged;
 	
@@ -20,46 +48,20 @@ public class Loan {
 	
 	private final String graceOnPrincipalPayment;
 	
-	private final String inArrearsTolerance;
-	
-	private final String interestCalculationPeriodType;
-	
 	private final String interestChargedFromDate;
-	
-	private final String interestRatePerPeriod;
-	
-	private final String interestType;
-	
-	private final String loanOfficerId;
-	
-	private final String loanTermFrequency;
-	
-	private final String loanTermFrequencyType;
-	
-	private final String loanType;
-	
-	private final Locale locale = Locale.ENGLISH;
-	
-	private final String numberOfRepayments;
-	
-	private final String principal;
-	
-	private final String productId;
-	
-	private final String repaymentEvery;
-	
-	private final String repaymentEveryFrequencyType;
 	
 	private final String repaymentsStartingFromDate;
 	
-	private final String submittedOnDate;
+	private final String dateFormat = "dd MMMM yyyy";
 	
-	private final String transactionProcessingStrategyId;
+	private final Locale locale = Locale.ENGLISH;
 	
-	public Loan(String amortizationType, String clientId, String expectedDisbursementDate, String fundId, String graceOnInterestCharged, String graceOnInterestPayment, String graceOnPrincipalPayment,
-			String inArrearsTolerance, String interestCalculationPeriodType, String interestChargedFromDate, String interestRatePerPeriod, String interestType, String loanOfficerId,
-			String loanTermFrequency, String loanTermFrequencyType, String loanType, String numberOfRepayments, String principal, String productId, String repaymentEvery,
-			String repaymentEveryFrequencyType, String repaymentsStartingFromDate, String submittedOnDate, String transactionProcessingStrategyId) {
+	private final String loanType = "individual";
+	
+	public Loan( String clientId, String productId, String loanOfficerId, String submittedOnDate, String fundId, String principal, String numberOfRepayments, String repaymentEvery,
+			String repaymentFrequencyType,  String loanTermFrequency, String loanTermFrequencyType, String interestRatePerPeriod, String expectedDisbursementDate, String amortizationType,
+			String interestType, String interestCalculationPeriodType, String inArrearsTolerance, String transactionProcessingStrategyId, String graceOnPrincipalPayment,
+			String graceOnInterestPayment, String graceOnInterestCharged, String interestChargedFromDate, String repaymentsStartingFromDate, Integer rowIndex) {
 		this.amortizationType = amortizationType;
 		this.clientId = clientId;
 		this.expectedDisbursementDate = expectedDisbursementDate;
@@ -75,15 +77,15 @@ public class Loan {
 		this.loanOfficerId = loanOfficerId;
 		this.loanTermFrequency = loanTermFrequency;
 		this.loanTermFrequencyType = loanTermFrequencyType;
-		this.loanType = loanType;
 		this.numberOfRepayments = numberOfRepayments;
 		this.principal = principal;
 		this.productId = productId;
 		this.repaymentEvery = repaymentEvery;
-		this.repaymentEveryFrequencyType = repaymentEveryFrequencyType;
+		this.repaymentFrequencyType = repaymentFrequencyType;
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 		this.submittedOnDate = submittedOnDate;
 		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+		this.rowIndex = rowIndex;
 	}
 	
 	public String getAmortizationType() {
@@ -166,8 +168,8 @@ public class Loan {
 		return repaymentEvery;
 	}
 	
-	public String getRepaymentEveryFrequencyType() {
-		return repaymentEveryFrequencyType;
+	public String getRepaymentFrequencyType() {
+		return repaymentFrequencyType;
 	}
 	
 	public String getRepaymentsStartingFromDate() {
@@ -189,5 +191,9 @@ public class Loan {
 	public Locale getLocale() {
 		return locale;
 	}
+	
+	public Integer getRowIndex() {
+        return rowIndex;
+    }
 	
 }
