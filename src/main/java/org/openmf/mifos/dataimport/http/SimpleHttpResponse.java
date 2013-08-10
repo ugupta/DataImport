@@ -23,7 +23,10 @@ public class SimpleHttpResponse
 
 	public InputStream getContent() throws IOException
 	{
-		content = connection.getInputStream();
+		if(connection.getResponseCode() == HttpURLConnection.HTTP_OK)
+		   content = connection.getInputStream();
+		else
+			content = connection.getErrorStream();
 		return content;
 	}
 

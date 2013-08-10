@@ -7,11 +7,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Loan;
+import org.openmf.mifos.dataimport.dto.LoanApproval;
+import org.openmf.mifos.dataimport.dto.LoanDisbursal;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class LoanDataImportHandler extends AbstractDataImportHandler {
 	
@@ -22,28 +26,32 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     public static final int PRODUCT_COL = 2;
     public static final int LOAN_OFFICER_NAME_COL = 3;
     public static final int SUBMITTED_ON_DATE_COL = 4;
-    public static final int FUND_NAME_COL = 5;
-    public static final int PRINCIPAL_COL = 6;
-    public static final int NO_OF_REPAYMENTS_COL = 7;
-    public static final int REPAID_EVERY_COL = 8;
-    public static final int REPAID_EVERY_FREQUENCY_COL = 9;
-    public static final int LOAN_TERM_COL = 10;
-    public static final int LOAN_TERM_FREQUENCY_COL = 11;
-    public static final int NOMINAL_INTEREST_RATE_COL = 12;
-    public static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 13;
-    public static final int DISBURSED_DATE_COL = 14;
-    public static final int AMORTIZATION_COL = 15;
-    public static final int INTEREST_METHOD_COL = 16;
-    public static final int INTEREST_CALCULATION_PERIOD_COL = 17;
-    public static final int ARREARS_TOLERANCE_COL = 18;
-    public static final int REPAYMENT_STRATEGY_COL = 19;
-    public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 20;
-    public static final int GRACE_ON_INTEREST_PAYMENT_COL = 21;
-    public static final int GRACE_ON_INTEREST_CHARGED_COL = 22;
-    public static final int INTEREST_CHARGED_FROM_COL = 23;
-    public static final int FIRST_REPAYMENT_COL = 24;
+    public static final int APPROVED_DATE_COL = 5;
+    public static final int DISBURSED_DATE_COL = 6;
+    public static final int DISBURSED_PAYMENT_TYPE_COL = 7;
+    public static final int FUND_NAME_COL = 8;
+    public static final int PRINCIPAL_COL = 9;
+    public static final int NO_OF_REPAYMENTS_COL = 10;
+    public static final int REPAID_EVERY_COL = 11;
+    public static final int REPAID_EVERY_FREQUENCY_COL = 12;
+    public static final int LOAN_TERM_COL = 13;
+    public static final int LOAN_TERM_FREQUENCY_COL = 14;
+    public static final int NOMINAL_INTEREST_RATE_COL = 15;
+    public static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 16;
+    public static final int AMORTIZATION_COL = 17;
+    public static final int INTEREST_METHOD_COL = 18;
+    public static final int INTEREST_CALCULATION_PERIOD_COL = 19;
+    public static final int ARREARS_TOLERANCE_COL = 20;
+    public static final int REPAYMENT_STRATEGY_COL = 21;
+    public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 22;
+    public static final int GRACE_ON_INTEREST_PAYMENT_COL = 23;
+    public static final int GRACE_ON_INTEREST_CHARGED_COL = 24;
+    public static final int INTEREST_CHARGED_FROM_COL = 25;
+    public static final int FIRST_REPAYMENT_COL = 26;
     
     private List<Loan> loans = new ArrayList<Loan>();
+    private List<LoanApproval> approvalDates = new ArrayList<LoanApproval>();
+    private List<LoanDisbursal> disbursalDates = new ArrayList<LoanDisbursal>();
     
     private final RestClient restClient;
     
@@ -59,6 +67,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet loanSheet = workbook.getSheet("Loans");
         Integer noOfEntries = getNumberOfRows(loanSheet);
+        logger.info(noOfEntries.toString());
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
@@ -70,12 +79,16 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 String loanOfficerName = readAsString(LOAN_OFFICER_NAME_COL, row);
                 String loanOfficerId = getIdByName(workbook.getSheet("Staff"), loanOfficerName).toString();
                 String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
+                String disbursedDate = readAsDate(DISBURSED_DATE_COL, row);
+                String approvedDate = readAsDate(APPROVED_DATE_COL, row);
+                String paymentType = readAsString(DISBURSED_PAYMENT_TYPE_COL, row);
+                String paymentTypeId = getIdByName(workbook.getSheet("Extras"), paymentType).toString();
                 String fundName = readAsString(FUND_NAME_COL, row);
                 String fundId;
                 if(fundName.equals(""))
                 	fundId = "";
                 else
-                    fundId = getIdByName(workbook.getSheet("Funds"), fundName).toString();
+                    fundId = getIdByName(workbook.getSheet("Extras"), fundName).toString();
                 String principal = readAsString(PRINCIPAL_COL, row);
                 String numberOfRepayments = readAsString(NO_OF_REPAYMENTS_COL, row);
                 String repaidEvery = readAsString(REPAID_EVERY_COL, row);
@@ -97,12 +110,11 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 else if(loanTermFrequency.equals("Months"))
                 	loanTermFrequencyId = "2";
                 String nominalInterestRate = readAsString(NOMINAL_INTEREST_RATE_COL, row);
-                String disbursedDate = readAsDate(DISBURSED_DATE_COL, row);
                 String amortization = readAsString(AMORTIZATION_COL, row);
                 String amortizationId = "";
                 if(amortization.equals("Equal principal payments"))
                 	amortizationId = "0";
-                else if(amortization.equals("Equal Installments"))
+                else if(amortization.equals("Equal installments"))
                 	amortizationId = "1";
                 String interestMethod = readAsString(INTEREST_METHOD_COL, row);
                 String interestMethodId = "";
@@ -136,9 +148,18 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 String graceOnInterestCharged = readAsString(GRACE_ON_INTEREST_CHARGED_COL, row);
                 String interestChargedFromDate = readAsDate(INTEREST_CHARGED_FROM_COL, row);
                 String firstRepaymentOnDate = readAsDate(FIRST_REPAYMENT_COL, row);
+                
                 loans.add(new Loan(clientId, productId, loanOfficerId, submittedOnDate, fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyId, loanTerm,
-                		loanTermFrequencyId, nominalInterestRate, disbursedDate, amortizationId, interestMethodId, interestCalculationPeriodId, arrearsTolerance, repaymentStrategyId,
+                		loanTermFrequencyId, nominalInterestRate, submittedOnDate, amortizationId, interestMethodId, interestCalculationPeriodId, arrearsTolerance, repaymentStrategyId,
                 		graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, rowIndex));
+                if(!approvedDate.equals(""))
+                   approvalDates.add(new LoanApproval(approvedDate, rowIndex));
+                else
+                   approvalDates.add(rowIndex - 1, null);	
+                if(!disbursedDate.equals(""))
+                   disbursalDates.add(new LoanDisbursal(disbursedDate, paymentTypeId, rowIndex));
+                else
+                   disbursalDates.add(rowIndex - 1, null);	
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -152,15 +173,29 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     public Result upload() {
         Result result = new Result();
         restClient.createAuthToken();
-        for (Loan loan : loans) {
+        for (int i = 0; i < loans.size(); i++) {
             try {
                 Gson gson = new Gson();
-                String payload = gson.toJson(loan);
+                String payload = gson.toJson(loans.get(i));
                 logger.info(payload);
-                restClient.post("loans", payload);
+                String response = restClient.post("loans", payload);
+                logger.info(response);
+                JsonParser parser = new JsonParser();
+                JsonObject obj = parser.parse(response).getAsJsonObject();
+                String loanId = obj.get("loanId").getAsString();
+                if(approvalDates.get(i) != null) {
+                   payload = gson.toJson(approvalDates.get(i));
+                   logger.info(payload);
+                   restClient.post("loans/" + loanId + "?command=approve", payload);
+                }
+                if(approvalDates.get(i) != null && disbursalDates.get(i) != null) {
+                payload = gson.toJson(disbursalDates.get(i));
+                logger.info(payload);
+                restClient.post("loans/" + loanId + "?command=disburse", payload);
+                }
             } catch (Exception e) {
-            	logger.error("row = " + loan.getRowIndex(), e);
-                result.addError("Row = " + loan.getRowIndex() + " ," + e.getMessage());
+            	logger.error("row = " + loans.get(i).getRowIndex(), e);
+                result.addError("Row = " + loans.get(i).getRowIndex() + " ," + e.getMessage());
             }
         }
         return result;

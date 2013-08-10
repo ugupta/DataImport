@@ -35,8 +35,16 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
 
     protected String readAsDate(int colIndex, Row row) {
-    	DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-        return dateFormat.format(row.getCell(colIndex).getDateCellValue());
+    	try{
+    		Cell c = row.getCell(colIndex);
+    		if(c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+    			return "";
+    		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+            return dateFormat.format(c.getDateCellValue());
+    	}  catch  (Exception e) {
+    		return e.getMessage();
+    	}
+    	
     }
     
     protected Boolean readAsBoolean(int colIndex, Row row) {
@@ -45,7 +53,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     
     public Integer getIdByName (Sheet sheet, String name) {
     	String sheetName = sheet.getSheetName();
-    	if(sheetName.equals("Offices") || sheetName.equals("Clients") || sheetName.equals("Staff") || sheetName.equals("Funds")) {
+    	if(sheetName.equals("Offices") || sheetName.equals("Clients") || sheetName.equals("Staff") || sheetName.equals("Extras")) {
     	for (Row row : sheet) {
             for (Cell cell : row) {
                 if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
@@ -54,7 +62,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
                             return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue(); 
                     	else if(sheet.getSheetName().equals("Staff") || sheet.getSheetName().equals("Clients"))
                            return ((Double)sheet.getRow(row.getRowNum() + 1).getCell(cell.getColumnIndex()).getNumericCellValue()).intValue();
-                    	else if(sheet.getSheetName().equals("Funds"))
+                    	else if(sheet.getSheetName().equals("Extras"))
                     		return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();
                     }
                 }

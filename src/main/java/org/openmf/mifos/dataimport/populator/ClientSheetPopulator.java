@@ -114,7 +114,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
 	        	lastColumnLetters.put(officeIndex++, colIndex);
 	        	rowIndex++;
     		}
-        	
+    		clientSheet.protectSheet("");
     	} catch (Exception e) {
     		result.addError(e.getMessage());
     		logger.error(e.getMessage());

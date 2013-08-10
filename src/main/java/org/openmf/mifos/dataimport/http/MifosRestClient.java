@@ -70,11 +70,11 @@ public class MifosRestClient implements RestClient {
                                 .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8")
                                 .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                                 .withContent(payload).execute();
+                String content = readContentAndClose(response.getContent());
             if (response.getStatus() != HttpURLConnection.HTTP_OK) 
               { 
-            	throw new IllegalStateException("Failed with status : " + response.getStatus());
+            	throw new IllegalStateException("Failed : " + content);
               }
-            String content = readContentAndClose(response.getContent());
             return content;
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -89,11 +89,11 @@ public class MifosRestClient implements RestClient {
     		    		          .addHeader(Header.AUTHORIZATION, "Basic " + authToken)
     		    		          .addHeader(Header.MIFOS_TENANT_ID,tenantId)
     		    		          .execute();
+    		      String content = readContentAndClose(response.getContent());
     		      if(response.getStatus() != HttpURLConnection.HTTP_OK)
     		      {
-    		    	  throw new IllegalStateException("Failed with status : " + response.getStatus());
+    		    	  throw new IllegalStateException("Failed : " + content);
     		      }
-    		      String content = readContentAndClose(response.getContent());
     		      return content;
     	} catch (IOException e) {
     		  throw new IllegalStateException(e);
@@ -107,7 +107,7 @@ public class MifosRestClient implements RestClient {
             SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
                         .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                         .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8").execute();
-            logger.info("Status: "+response.getStatus());
+            logger.info("Status: "+response.getStatus() + " - Auth Token Created");
             String content = readContentAndClose(response.getContent());
             AuthToken auth = new Gson().fromJson(content, AuthToken.class);
             authToken = auth.getBase64EncodedAuthenticationKey();

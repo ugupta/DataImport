@@ -32,35 +32,37 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	private ClientSheetPopulator clientSheetPopulator;
 	private PersonnelSheetPopulator personnelSheetPopulator;
 	private ProductSheetPopulator productSheetPopulator;
-	private FundSheetPopulator fundSheetPopulator;
+	private ExtrasSheetPopulator extrasSheetPopulator;
 	
 	public static final int OFFICE_NAME_COL = 0;
     public static final int CLIENT_NAME_COL = 1;
     public static final int PRODUCT_COL = 2;
     public static final int LOAN_OFFICER_NAME_COL = 3;
     public static final int SUBMITTED_ON_DATE_COL = 4;
-    public static final int FUND_NAME_COL = 5;
-    public static final int PRINCIPAL_COL = 6;
-    public static final int NO_OF_REPAYMENTS_COL = 7;
-    public static final int REPAID_EVERY_COL = 8;
-    public static final int REPAID_EVERY_FREQUENCY_COL = 9;
-    public static final int LOAN_TERM_COL = 10;
-    public static final int LOAN_TERM_FREQUENCY_COL = 11;
-    public static final int NOMINAL_INTEREST_RATE_COL = 12;
-    public static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 13;
-    public static final int DISBURSED_DATE_COL = 14;
-    public static final int AMORTIZATION_COL = 15;
-    public static final int INTEREST_METHOD_COL = 16;
-    public static final int INTEREST_CALCULATION_PERIOD_COL = 17;
-    public static final int ARREARS_TOLERANCE_COL = 18;
-    public static final int REPAYMENT_STRATEGY_COL = 19;
-    public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 20;
-    public static final int GRACE_ON_INTEREST_PAYMENT_COL = 21;
-    public static final int GRACE_ON_INTEREST_CHARGED_COL = 22;
-    public static final int INTEREST_CHARGED_FROM_COL = 23;
-    public static final int FIRST_REPAYMENT_COL = 24;
-    public static final int LOOKUP_CLIENT_NAME_COL = 26;
-    public static final int LOOKUP_ACTIVATION_DATE_COL = 27;
+    public static final int APPROVED_DATE_COL = 5;
+    public static final int DISBURSED_DATE_COL = 6;
+    public static final int DISBURSED_PAYMENT_TYPE_COL = 7;
+    public static final int FUND_NAME_COL = 8;
+    public static final int PRINCIPAL_COL = 9;
+    public static final int NO_OF_REPAYMENTS_COL = 10;
+    public static final int REPAID_EVERY_COL = 11;
+    public static final int REPAID_EVERY_FREQUENCY_COL = 12;
+    public static final int LOAN_TERM_COL = 13;
+    public static final int LOAN_TERM_FREQUENCY_COL = 14;
+    public static final int NOMINAL_INTEREST_RATE_COL = 15;
+    public static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 16;
+    public static final int AMORTIZATION_COL = 17;
+    public static final int INTEREST_METHOD_COL = 18;
+    public static final int INTEREST_CALCULATION_PERIOD_COL = 19;
+    public static final int ARREARS_TOLERANCE_COL = 20;
+    public static final int REPAYMENT_STRATEGY_COL = 21;
+    public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 22;
+    public static final int GRACE_ON_INTEREST_PAYMENT_COL = 23;
+    public static final int GRACE_ON_INTEREST_CHARGED_COL = 24;
+    public static final int INTEREST_CHARGED_FROM_COL = 25;
+    public static final int FIRST_REPAYMENT_COL = 26;
+    public static final int LOOKUP_CLIENT_NAME_COL = 32;
+    public static final int LOOKUP_ACTIVATION_DATE_COL = 33;
 	
 	public LoanWorkbookPopulator(RestClient restClient) {
     	this.restClient = restClient;
@@ -71,14 +73,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    	clientSheetPopulator = new ClientSheetPopulator(restClient);
 	    	personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.TRUE, restClient);
 	    	productSheetPopulator = new ProductSheetPopulator(restClient);
-	    	fundSheetPopulator = new FundSheetPopulator(restClient);
+	    	extrasSheetPopulator = new ExtrasSheetPopulator(restClient);
 	    	Result result =  clientSheetPopulator.downloadAndParse();
 	    	if(result.isSuccess())
 	    		result = personnelSheetPopulator.downloadAndParse();
 	    	if(result.isSuccess())
 	    		result = productSheetPopulator.downloadAndParse();
 	    	if(result.isSuccess())
-	    		result = fundSheetPopulator.downloadAndParse();
+	    		result = extrasSheetPopulator.downloadAndParse();
 	    	return result;
 	    }
 
@@ -91,7 +93,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    	if(result.isSuccess())
 	    		result = productSheetPopulator.populate(workbook);
 	    	if(result.isSuccess())
-	    		result = fundSheetPopulator.populate(workbook);
+	    		result = extrasSheetPopulator.populate(workbook);
 	    	setLayout(loanSheet);
 	    	if(result.isSuccess())
 	            result = setRules(loanSheet);
@@ -109,6 +111,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             worksheet.setColumnWidth(PRODUCT_COL, 4000);
             worksheet.setColumnWidth(LOAN_OFFICER_NAME_COL, 4000);
             worksheet.setColumnWidth(SUBMITTED_ON_DATE_COL, 3200);
+            worksheet.setColumnWidth(APPROVED_DATE_COL, 3200);
+            worksheet.setColumnWidth(DISBURSED_DATE_COL, 3700);
+            worksheet.setColumnWidth(DISBURSED_PAYMENT_TYPE_COL, 4000);
             worksheet.setColumnWidth(FUND_NAME_COL, 4000);
             worksheet.setColumnWidth(PRINCIPAL_COL, 3000);
             worksheet.setColumnWidth(LOAN_TERM_COL, 2000);
@@ -118,7 +123,6 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             worksheet.setColumnWidth(REPAID_EVERY_FREQUENCY_COL, 2000);
             worksheet.setColumnWidth(NOMINAL_INTEREST_RATE_COL, 2000);
             worksheet.setColumnWidth(NOMINAL_INTEREST_RATE_FREQUENCY_COL, 3000);
-            worksheet.setColumnWidth(DISBURSED_DATE_COL, 3700);
             worksheet.setColumnWidth(AMORTIZATION_COL, 6000);
             worksheet.setColumnWidth(INTEREST_METHOD_COL, 4500);
             worksheet.setColumnWidth(INTEREST_CALCULATION_PERIOD_COL, 6000);
@@ -136,13 +140,15 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             writeString(PRODUCT_COL, rowHeader, "Product*");
             writeString(LOAN_OFFICER_NAME_COL, rowHeader, "Loan Officer*");
             writeString(SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On*");
+            writeString(APPROVED_DATE_COL, rowHeader, "Approved On*");
+            writeString(DISBURSED_DATE_COL, rowHeader, "Disbursed Date*");
+            writeString(DISBURSED_PAYMENT_TYPE_COL, rowHeader, "Payment Type*");
             writeString(FUND_NAME_COL, rowHeader, "Fund Name");
             writeString(PRINCIPAL_COL, rowHeader, "Principal*");
             writeString(LOAN_TERM_COL, rowHeader, "Loan Term*");
             writeString(NO_OF_REPAYMENTS_COL, rowHeader, "# of Repayments*");
             writeString(REPAID_EVERY_COL, rowHeader, "Repaid Every*");
             writeString(NOMINAL_INTEREST_RATE_COL, rowHeader, "Nominal Interest %*");
-            writeString(DISBURSED_DATE_COL, rowHeader, "Disbursed Date*");
             writeString(AMORTIZATION_COL, rowHeader, "Amortization*");
             writeString(INTEREST_METHOD_COL, rowHeader, "Interest Method*");
             writeString(INTEREST_CALCULATION_PERIOD_COL, rowHeader, "Interest Calculation Period*");
@@ -185,14 +191,13 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	CellRangeAddressList clientNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CLIENT_NAME_COL, CLIENT_NAME_COL);
 	        	CellRangeAddressList productNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), PRODUCT_COL, PRODUCT_COL);
 	        	CellRangeAddressList loanOfficerRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), LOAN_OFFICER_NAME_COL, LOAN_OFFICER_NAME_COL);
-	        	CellRangeAddressList dateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), SUBMITTED_ON_DATE_COL, SUBMITTED_ON_DATE_COL);
+	        	CellRangeAddressList submittedDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), SUBMITTED_ON_DATE_COL, SUBMITTED_ON_DATE_COL);
 	        	CellRangeAddressList fundNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), FUND_NAME_COL, FUND_NAME_COL);
 	        	CellRangeAddressList principalRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), PRINCIPAL_COL, PRINCIPAL_COL);
 	        	CellRangeAddressList noOfRepaymentsRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), NO_OF_REPAYMENTS_COL, NO_OF_REPAYMENTS_COL);
 	        	CellRangeAddressList repaidFrequencyRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), REPAID_EVERY_FREQUENCY_COL, REPAID_EVERY_FREQUENCY_COL);
 	        	CellRangeAddressList loanTermRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), LOAN_TERM_COL, LOAN_TERM_COL);
 	        	CellRangeAddressList loanTermFrequencyRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), LOAN_TERM_FREQUENCY_COL, LOAN_TERM_FREQUENCY_COL);
-	        	CellRangeAddressList disbursedDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), DISBURSED_DATE_COL, DISBURSED_DATE_COL);
 	        	CellRangeAddressList interestFrequencyRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), NOMINAL_INTEREST_RATE_FREQUENCY_COL, NOMINAL_INTEREST_RATE_FREQUENCY_COL);
 	        	CellRangeAddressList interestRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), NOMINAL_INTEREST_RATE_COL, NOMINAL_INTEREST_RATE_COL);
 	        	CellRangeAddressList amortizationRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), AMORTIZATION_COL, AMORTIZATION_COL);
@@ -203,6 +208,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	CellRangeAddressList graceOnPrincipalPaymentRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), GRACE_ON_PRINCIPAL_PAYMENT_COL, GRACE_ON_PRINCIPAL_PAYMENT_COL);
 	        	CellRangeAddressList graceOnInterestPaymentRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), GRACE_ON_INTEREST_PAYMENT_COL, GRACE_ON_INTEREST_PAYMENT_COL);
 	        	CellRangeAddressList graceOnInterestChargedRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), GRACE_ON_INTEREST_CHARGED_COL, GRACE_ON_INTEREST_CHARGED_COL);
+	        	CellRangeAddressList approvedDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), APPROVED_DATE_COL, APPROVED_DATE_COL);
+	        	CellRangeAddressList disbursedDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), DISBURSED_DATE_COL, DISBURSED_DATE_COL);
+	        	CellRangeAddressList paymentTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), DISBURSED_PAYMENT_TYPE_COL, DISBURSED_PAYMENT_TYPE_COL);
 	        	
 	        	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
 	        	Workbook loanWorkbook = worksheet.getWorkbook();
@@ -245,7 +253,12 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	//Fund Name
 	        	Name fundGroup = loanWorkbook.createName();
 	        	fundGroup.setNameName("Funds");
-	        	fundGroup.setRefersToFormula("Funds!$B$2:$B$" + (fundSheetPopulator.getFundsSize() + 1));
+	        	fundGroup.setRefersToFormula("Extras!$B$2:$B$" + (extrasSheetPopulator.getFundsSize() + 1));
+	        	
+	        	//Payment Type Name
+	        	Name paymentTypeGroup = loanWorkbook.createName();
+	        	paymentTypeGroup.setNameName("PaymentTypes");
+	        	paymentTypeGroup.setRefersToFormula("Extras!$D$2:$D$" + (extrasSheetPopulator.getPaymentTypesSize() + 1));
 	        	
 	        	//Default Fund Names
 	        	ArrayList<Name> fundOfProduct = new ArrayList<Name>();
@@ -381,83 +394,93 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	}
 	        	
 	        	//Amortization Names
-	        	ArrayList<Name> AmortizationOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> amortizationOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$P$" + (i + 2));
-	        		AmortizationOfProduct.add(loanWorkbook.createName());
-	        		AmortizationOfProduct.get(i).setNameName(products.get(i).getName() + "_AMORTIZATION");
-	        		AmortizationOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		amortizationOfProduct.add(loanWorkbook.createName());
+	        		amortizationOfProduct.get(i).setNameName(products.get(i).getName() + "_AMORTIZATION");
+	        		amortizationOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Interest Type Names
-	        	ArrayList<Name> InterestTypeOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> interestTypeOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$Q$" + (i + 2));
-	        		InterestTypeOfProduct.add(loanWorkbook.createName());
-	        		InterestTypeOfProduct.get(i).setNameName(products.get(i).getName() + "_INTEREST_TYPE");
-	        		InterestTypeOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		interestTypeOfProduct.add(loanWorkbook.createName());
+	        		interestTypeOfProduct.get(i).setNameName(products.get(i).getName() + "_INTEREST_TYPE");
+	        		interestTypeOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Interest Calculation Period Names
-	        	ArrayList<Name> InterestCalculationPeriodOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> interestCalculationPeriodOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$R$" + (i + 2));
-	        		InterestCalculationPeriodOfProduct.add(loanWorkbook.createName());
-	        		InterestCalculationPeriodOfProduct.get(i).setNameName(products.get(i).getName() + "_INTEREST_CALCULATION");
-	        		InterestCalculationPeriodOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		interestCalculationPeriodOfProduct.add(loanWorkbook.createName());
+	        		interestCalculationPeriodOfProduct.get(i).setNameName(products.get(i).getName() + "_INTEREST_CALCULATION");
+	        		interestCalculationPeriodOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Transaction Processing Strategy Names
-	        	ArrayList<Name> TransactionProcessingStrategyOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> transactionProcessingStrategyOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$T$" + (i + 2));
-	        		TransactionProcessingStrategyOfProduct.add(loanWorkbook.createName());
-	        		TransactionProcessingStrategyOfProduct.get(i).setNameName(products.get(i).getName() + "_STRATEGY");
-	        		TransactionProcessingStrategyOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		transactionProcessingStrategyOfProduct.add(loanWorkbook.createName());
+	        		transactionProcessingStrategyOfProduct.get(i).setNameName(products.get(i).getName() + "_STRATEGY");
+	        		transactionProcessingStrategyOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Arrears Tolerance Names
-	        	ArrayList<Name> ArrearsToleranceOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> arrearsToleranceOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$S$" + (i + 2));
-	        		ArrearsToleranceOfProduct.add(loanWorkbook.createName());
-	        		ArrearsToleranceOfProduct.get(i).setNameName(products.get(i).getName() + "_ARREARS_TOLERANCE");
-	        		ArrearsToleranceOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		arrearsToleranceOfProduct.add(loanWorkbook.createName());
+	        		arrearsToleranceOfProduct.get(i).setNameName(products.get(i).getName() + "_ARREARS_TOLERANCE");
+	        		arrearsToleranceOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Grace On Principal Payment Names
-	        	ArrayList<Name> GraceOnPrincipalPaymentOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> graceOnPrincipalPaymentOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$U$" + (i + 2));
-	        		GraceOnPrincipalPaymentOfProduct.add(loanWorkbook.createName());
-	        		GraceOnPrincipalPaymentOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_PRINCIPAL");
-	        		GraceOnPrincipalPaymentOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		graceOnPrincipalPaymentOfProduct.add(loanWorkbook.createName());
+	        		graceOnPrincipalPaymentOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_PRINCIPAL");
+	        		graceOnPrincipalPaymentOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Grace On Interest Payment Names
-	        	ArrayList<Name> GraceOnInterestPaymentOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> graceOnInterestPaymentOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$V$" + (i + 2));
-	        		GraceOnInterestPaymentOfProduct.add(loanWorkbook.createName());
-	        		GraceOnInterestPaymentOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_INTEREST_PAYMENT");
-	        		GraceOnInterestPaymentOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		graceOnInterestPaymentOfProduct.add(loanWorkbook.createName());
+	        		graceOnInterestPaymentOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_INTEREST_PAYMENT");
+	        		graceOnInterestPaymentOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	//Grace On Principal Payment Names
-	        	ArrayList<Name> GraceOnInterestChargedOfProduct = new ArrayList<Name>();
+	        	ArrayList<Name> graceOnInterestChargedOfProduct = new ArrayList<Name>();
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0; i < products.size(); i++) {
 	        		formulas.add("Products!$W$" + (i + 2));
-	        		GraceOnInterestChargedOfProduct.add(loanWorkbook.createName());
-	        		GraceOnInterestChargedOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_INTEREST_CHARGED");
-	        		GraceOnInterestChargedOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        		graceOnInterestChargedOfProduct.add(loanWorkbook.createName());
+	        		graceOnInterestChargedOfProduct.get(i).setNameName(products.get(i).getName() + "_GRACE_INTEREST_CHARGED");
+	        		graceOnInterestChargedOfProduct.get(i).setRefersToFormula(formulas.get(i));
+	        	}
+	        	
+	        	//Product Start Date Names
+	        	ArrayList<Name> startDateOfProduct = new ArrayList<Name>();
+	        	formulas = new ArrayList<String>();
+	        	for(Integer i = 0; i < products.size(); i++) {
+	        		formulas.add("Products!$X$" + (i + 2));
+	        		startDateOfProduct.add(loanWorkbook.createName());
+	        		startDateOfProduct.get(i).setNameName(products.get(i).getName() + "_START_DATE");
+	        		startDateOfProduct.get(i).setRefersToFormula(formulas.get(i));
 	        	}
 	        	
 	        	
@@ -465,16 +488,18 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	DataValidationConstraint clientNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT($A1)");
 	        	DataValidationConstraint productNameConstraint = validationHelper.createFormulaListConstraint("Products");
 	        	DataValidationConstraint loanOfficerNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE($A1,\"X\"))");
-	        	DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($B1,$AA$2:$AB$" + (clientSheetPopulator.getClientsSize() + 1) + ",2,FALSE)", "=TODAY()", "dd/mm/yy");
-	        	DataValidationConstraint disbursedDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$E1", "=TODAY()", "dd/mm/yy");
+	        	DataValidationConstraint submittedDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=IF(INDIRECT(CONCATENATE($C1,\"_START_DATE\"))>VLOOKUP($B1,$AG$2:$AH$" + (clientSheetPopulator.getClientsSize() + 1) + ",2,FALSE),INDIRECT(CONCATENATE($C1,\"_START_DATE\")),VLOOKUP($B1,$AG$2:$AH$" + (clientSheetPopulator.getClientsSize() + 1) + ",2,FALSE))", "=TODAY()", "dd/mm/yy");
+	        	DataValidationConstraint approvalDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$E1", "=TODAY()", "dd/mm/yy");
+	        	DataValidationConstraint disbursedDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$F1", "=TODAY()", "dd/mm/yy");
+	        	DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
 	        	DataValidationConstraint fundNameConstraint = validationHelper.createFormulaListConstraint("Funds");
 	        	DataValidationConstraint principalConstraint = validationHelper.createDecimalConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE($C1,\"_Min_Principal\"))", "=INDIRECT(CONCATENATE($C1,\"_Max_Principal\"))");
 	        	DataValidationConstraint noOfRepaymentsConstraint = validationHelper.createIntegerConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE($C1,\"_Min_Repayment\"))", "=INDIRECT(CONCATENATE($C1,\"_Max_Repayment\"))");
 	        	DataValidationConstraint frequencyConstraint = validationHelper.createExplicitListConstraint(new String[] {"Days","Weeks","Months"});
-	        	DataValidationConstraint loanTermConstraint = validationHelper.createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$H1*$I1", null);
+	        	DataValidationConstraint loanTermConstraint = validationHelper.createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$K1*$L1", null);
 	        	DataValidationConstraint interestFrequencyConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE($C1,\"_INTEREST_FREQUENCY\"))");
 	        	DataValidationConstraint interestConstraint = validationHelper.createIntegerConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE($C1,\"_MIN_INTEREST\"))", "=INDIRECT(CONCATENATE($C1,\"_MAX_INTEREST\"))");
-	        	DataValidationConstraint amortizationConstraint = validationHelper.createExplicitListConstraint(new String[] {"Equal principal payments","Equal Installments"});
+	        	DataValidationConstraint amortizationConstraint = validationHelper.createExplicitListConstraint(new String[] {"Equal principal payments","Equal installments"});
 	        	DataValidationConstraint interestMethodConstraint = validationHelper.createExplicitListConstraint(new String[] {"Flat","Declining Balance"});
 	        	DataValidationConstraint interestCalculationPeriodConstraint = validationHelper.createExplicitListConstraint(new String[] {"Daily","Same as repayment period"});
 	        	DataValidationConstraint repaymentStrategyConstraint = validationHelper.createExplicitListConstraint(new String[] {"Mifos style","Heavensfamily","Creocore","RBI (India)","Principal Interest Penalties Fees Order","Interest Principal Penalties Fees Order"});
@@ -505,7 +530,10 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	interestCalculationPeriodValidation.setSuppressDropDownArrow(false);
 	        	DataValidation repaymentStrategyValidation = validationHelper.createValidation(repaymentStrategyConstraint, repaymentStrategyRange);
 	        	repaymentStrategyValidation.setSuppressDropDownArrow(false);
-	        	DataValidation activationDateValidation = validationHelper.createValidation(activationDateConstraint, dateRange);
+	        	DataValidation paymentTypeValidation = validationHelper.createValidation(paymentTypeConstraint, paymentTypeRange);
+	        	paymentTypeValidation.setSuppressDropDownArrow(false);
+	        	DataValidation submittedDateValidation = validationHelper.createValidation(submittedDateConstraint, submittedDateRange);
+	        	DataValidation approvalDateValidation = validationHelper.createValidation(approvalDateConstraint, approvedDateRange);
 	        	DataValidation disbursedDateValidation = validationHelper.createValidation(disbursedDateConstraint, disbursedDateRange);
 	        	DataValidation principalValidation = validationHelper.createValidation(principalConstraint, principalRange);
 	        	DataValidation loanTermValidation = validationHelper.createValidation(loanTermConstraint, loanTermRange);
@@ -524,8 +552,10 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	            worksheet.addValidationData(clientValidation);
 	            worksheet.addValidationData(productNameValidation);
 	            worksheet.addValidationData(loanOfficerValidation);
-	            worksheet.addValidationData(activationDateValidation);
+	            worksheet.addValidationData(submittedDateValidation);
+	            worksheet.addValidationData(approvalDateValidation);
 	            worksheet.addValidationData(disbursedDateValidation);
+	            worksheet.addValidationData(paymentTypeValidation);
 	            worksheet.addValidationData(fundNameValidation);
 	            worksheet.addValidationData(principalValidation);
 	            worksheet.addValidationData(repaidFrequencyValidation);
@@ -559,8 +589,8 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    			row.createCell(REPAID_EVERY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_EVERY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_EVERY\")))");
 	    			row.createCell(REPAID_EVERY_FREQUENCY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\")))");
 	    			row.createCell(NO_OF_REPAYMENTS_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_No_Repayment\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_No_Repayment\")))");
-	    			row.createCell(LOAN_TERM_COL).setCellFormula("IF(ISERROR($H" + (rowNo + 1) + "*$I" + (rowNo + 1) + "),\"\",$H" + (rowNo + 1) + "*$I" + (rowNo + 1) + ")");
-	    			row.createCell(LOAN_TERM_FREQUENCY_COL).setCellFormula("$J" + (rowNo + 1));
+	    			row.createCell(LOAN_TERM_COL).setCellFormula("IF(ISERROR($K" + (rowNo + 1) + "*$L" + (rowNo + 1) + "),\"\",$K" + (rowNo + 1) + "*$L" + (rowNo + 1) + ")");
+	    			row.createCell(LOAN_TERM_FREQUENCY_COL).setCellFormula("$M" + (rowNo + 1));
 	    			row.createCell(NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\")))");
 	    			row.createCell(NOMINAL_INTEREST_RATE_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\")))");
 	    			row.createCell(AMORTIZATION_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\")))");

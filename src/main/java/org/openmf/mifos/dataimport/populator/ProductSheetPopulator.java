@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -51,6 +52,8 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 20;
 	public static final int GRACE_ON_INTEREST_PAYMENT_COL = 21;
 	public static final int GRACE_ON_INTEREST_CHARGED_COL = 22;
+	public static final int START_DATE_COL = 23;
+	public static final int CLOSE_DATE_COL = 24;
 	
 	public ProductSheetPopulator(RestClient client) {
         this.client = client;
@@ -88,6 +91,9 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	    		int rowIndex = 1;
 	            Sheet productSheet = workbook.createSheet("Products");
 	            setLayout(productSheet);
+	            CellStyle dateCellStyle = workbook.createCellStyle();
+	            short df = workbook.createDataFormat().getFormat("dd/mm/yy");
+	            dateCellStyle.setDataFormat(df);
 	            for(Product product : products) {
 	            	Row row = productSheet.createRow(rowIndex++);
 	            	writeInt(ID_COL, row, product.getId());
@@ -136,7 +142,15 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	            	    writeInt(GRACE_ON_INTEREST_PAYMENT_COL, row, product.getGraceOnInterestPayment());
 	            	if(product.getGraceOnInterestCharged() != null)
 	            	    writeInt(GRACE_ON_INTEREST_CHARGED_COL, row, product.getGraceOnInterestCharged());
-	            	
+	            	if(product.getStartDate() != null)
+	            	    writeDate(START_DATE_COL, row, product.getStartDate().get(2) + "/" + product.getStartDate().get(1) + "/" + product.getStartDate().get(0), dateCellStyle);
+	            	else
+	            		writeDate(START_DATE_COL, row, "1/1/1970", dateCellStyle);
+	            	if(product.getCloseDate() != null)
+	            		writeDate(CLOSE_DATE_COL, row, product.getCloseDate().get(2) + "/" + product.getCloseDate().get(1) + "/" + product.getCloseDate().get(0), dateCellStyle);
+	            	else
+	            		writeDate(CLOSE_DATE_COL, row, "1/1/2040", dateCellStyle);
+	            	productSheet.protectSheet("");
 	            }
 	    	} catch (Exception e) {
 	    		result.addError(e.getMessage());
@@ -169,6 +183,8 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	        worksheet.setColumnWidth(GRACE_ON_PRINCIPAL_PAYMENT_COL, 4000);
 	        worksheet.setColumnWidth(GRACE_ON_INTEREST_PAYMENT_COL, 6000);
 	        worksheet.setColumnWidth(GRACE_ON_INTEREST_CHARGED_COL, 6000);
+	        worksheet.setColumnWidth(START_DATE_COL, 3000);
+	        worksheet.setColumnWidth(CLOSE_DATE_COL, 3000);
 	        
 	        Row rowHeader = worksheet.createRow(0);
 	        rowHeader.setHeight((short)500);
@@ -195,7 +211,8 @@ public class ProductSheetPopulator extends AbstractWorkbookPopulator {
 	        writeString(GRACE_ON_PRINCIPAL_PAYMENT_COL, rowHeader, "Grace On Principal Payment");
 	        writeString(GRACE_ON_INTEREST_PAYMENT_COL, rowHeader, "Grace on Interest Payment");
 	        writeString(GRACE_ON_INTEREST_CHARGED_COL, rowHeader, "Grace on Interest Charged");
-	        
+	        writeString(START_DATE_COL, rowHeader, "Start Date");
+	        writeString(CLOSE_DATE_COL, rowHeader, "End Date");
 	 }
 	 
 	 public List<Product> getProducts() {

@@ -1,9 +1,6 @@
 package org.openmf.mifos.dataimport.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -11,12 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class SimpleHttpRequest {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SimpleHttpRequest.class);
 
     private static final int HTTP_TIMEOUT = 100 * 1000; // 100 secs
 	
@@ -40,13 +32,6 @@ public class SimpleHttpRequest {
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(),"UTF-8");
             out.write(content);
             close(out);
-            InputStream developerMessage = null;
-            if (connection.getResponseCode() >= 400) {
-                developerMessage = connection.getErrorStream();
-            } else {
-                developerMessage = connection.getInputStream();
-            }
-            logger.info(new BufferedReader(new InputStreamReader(developerMessage)).readLine());
         }
     }
 

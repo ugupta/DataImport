@@ -1,5 +1,7 @@
 package org.openmf.mifos.dataimport.dto;
 
+import java.util.ArrayList;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Product {
@@ -76,10 +78,16 @@ public class Product {
 	@SerializedName("status")
 	private final String status;
 	
+	@SerializedName("startDate")
+    private final ArrayList<Integer> startDate;
+	
+	@SerializedName("closeDate")
+    private final ArrayList<Integer> closeDate;
+	
 	public Product(Integer id, String name, String fundName, String status, Integer principal, Integer minPrincipal, Integer maxPrincipal, Integer numberOfRepayments, Integer minNumberOfRepayments,
 			Integer maxNumberOfRepayments, Integer repaymentEvery, Type repaymentFrequencyType, Integer interestRatePerPeriod, Integer minInterestRatePerPeriod, Integer maxInterestRatePerPeriod,
 			Type interestRateFrequencyType, Type amortizationType, Type interestType, Type interestCalculationPeriodType, Integer inArrearsTolerance, String transactionProcessingStrategyName,
-			Integer graceOnPrincipalPayment, Integer graceOnInterestPayment, Integer graceOnInterestCharged) {
+			Integer graceOnPrincipalPayment, Integer graceOnInterestPayment, Integer graceOnInterestCharged, ArrayList<Integer> startDate, ArrayList<Integer> closeDate) {
 		this.id = id;
 		this.name = name;
 		this.fundName = fundName;
@@ -104,6 +112,8 @@ public class Product {
 	    this.graceOnPrincipalPayment = graceOnPrincipalPayment;
 	    this.graceOnInterestPayment = graceOnInterestPayment;
 	    this.graceOnInterestCharged = graceOnInterestCharged;
+	    this.startDate = startDate;
+	    this.closeDate = closeDate;
 	}
 	
 	
@@ -203,4 +213,12 @@ public class Product {
 	public Integer getGraceOnInterestCharged() {
 		return this.graceOnInterestCharged;
 	}
+	
+	public ArrayList<Integer> getStartDate() {
+        return this.startDate;
+    }
+	
+	public ArrayList<Integer> getCloseDate() {
+        return this.closeDate;
+    }
 }
