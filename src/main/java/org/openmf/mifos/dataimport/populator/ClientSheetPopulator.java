@@ -60,7 +60,8 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
             while(iterator.hasNext()) {
             	JsonElement json = iterator.next();
             	GeneralClient client = gson.fromJson(json, GeneralClient.class);
-            	clients.add(client);
+            	if(client.isActive())
+            	  clients.add(client);
             	nameToId.put(client.getDisplayName(), client.getId());
             }
             content = restClient.get("offices");

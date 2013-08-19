@@ -2,10 +2,16 @@ package org.openmf.mifos.dataimport.handler;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public abstract class AbstractDataImportHandler implements DataImportHandler {
 
@@ -21,6 +27,10 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
 
     protected int readAsInt(int colIndex, Row row) {
         return ((Double) row.getCell(colIndex).getNumericCellValue()).intValue();
+    }
+    
+    protected Double readAsDouble(int colIndex, Row row) {
+    	return row.getCell(colIndex).getNumericCellValue();
     }
 
     protected String readAsString(int colIndex, Row row) {
@@ -49,6 +59,24 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     
     protected Boolean readAsBoolean(int colIndex, Row row) {
     	return row.getCell(colIndex).getBooleanCellValue();
+    }
+    
+    protected void writeString(int colIndex, Row row, String value) {
+        row.createCell(colIndex).setCellValue(value);
+    }
+    
+    protected String parseStatus(String errorMessage) {
+    	String message = "";
+    	JsonObject obj = new JsonParser().parse(errorMessage.trim()).getAsJsonObject();
+        JsonArray array = obj.getAsJsonArray("errors");
+        Iterator<JsonElement> iterator = array.iterator();
+        while(iterator.hasNext()) {
+        	JsonObject json = iterator.next().getAsJsonObject();
+        	String parameterName = json.get("parameterName").toString();
+        	String defaultUserMessage = json.get("defaultUserMessage").toString();
+        	message += parameterName.substring(1, parameterName.length() - 1) + ":" + defaultUserMessage.substring(1, defaultUserMessage.length() - 1) + "\t";
+         }
+    	 return message;
     }
     
     public Integer getIdByName (Sheet sheet, String name) {

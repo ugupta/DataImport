@@ -35,9 +35,9 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     public static final int EXTERNAL_ID_COL = 5;
     public static final int ACTIVATION_DATE_COL = 6;
     public static final int ACTIVE_COL = 7;
-    public static final int WARNING_COL = 8;
-    public static final int RELATIONAL_OFFICE_NAME_COL = 12;
-    public static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 13;
+    public static final int WARNING_COL = 9;
+    public static final int RELATIONAL_OFFICE_NAME_COL = 16;
+    public static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 17;
 
 	private final RestClient client;
 	private final String clientType;
@@ -92,9 +92,9 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     		worksheet.setColumnWidth(MIDDLE_NAME_COL, 0);
     		writeString(FULL_NAME_COL, rowHeader, "Full/Business Name*");
     	}
-        worksheet.setColumnWidth(OFFICE_NAME_COL, 6000);
-        worksheet.setColumnWidth(STAFF_NAME_COL, 6000);
-        worksheet.setColumnWidth(EXTERNAL_ID_COL, 4000);
+        worksheet.setColumnWidth(OFFICE_NAME_COL, 5000);
+        worksheet.setColumnWidth(STAFF_NAME_COL, 5000);
+        worksheet.setColumnWidth(EXTERNAL_ID_COL, 3500);
         worksheet.setColumnWidth(ACTIVATION_DATE_COL, 4000);
         worksheet.setColumnWidth(ACTIVE_COL, 2000);
         worksheet.setColumnWidth(RELATIONAL_OFFICE_NAME_COL, 6000);
@@ -162,7 +162,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
     	DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
     	DataValidationConstraint staffNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT($D1)");
-    	DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$M$2:$N" + (offices.size() + 1)+",2,FALSE)", "=TODAY()", "dd/mm/yy");
+    	DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$Q$2:$R" + (offices.size() + 1)+",2,FALSE)", "=TODAY()", "dd/mm/yy");
     	DataValidationConstraint activeConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
 
 

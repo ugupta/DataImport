@@ -3,12 +3,16 @@ package org.openmf.mifos.dataimport.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Loan;
 import org.openmf.mifos.dataimport.dto.LoanApproval;
 import org.openmf.mifos.dataimport.dto.LoanDisbursal;
+import org.openmf.mifos.dataimport.dto.LoanRepayment;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +52,17 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     public static final int GRACE_ON_INTEREST_CHARGED_COL = 24;
     public static final int INTEREST_CHARGED_FROM_COL = 25;
     public static final int FIRST_REPAYMENT_COL = 26;
+    public static final int TOTAL_AMOUNT_REPAID_COL = 27;
+    public static final int LAST_REPAYMENT_DATE_COL = 28;
+    public static final int REPAYMENT_TYPE_COL = 29;
+    public static final int STATUS_COL = 30;
+    public static final int LOAN_ID_COL = 31;
+    public static final int FAILURE_REPORT_COL = 32;
     
     private List<Loan> loans = new ArrayList<Loan>();
     private List<LoanApproval> approvalDates = new ArrayList<LoanApproval>();
     private List<LoanDisbursal> disbursalDates = new ArrayList<LoanDisbursal>();
+    private List<LoanRepayment> loanRepayments = new ArrayList<LoanRepayment>();
     
     private final RestClient restClient;
     
@@ -72,6 +83,9 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
             Row row;
             try {
                 row = loanSheet.getRow(rowIndex);
+                String status = readAsString(STATUS_COL, row);
+                if(status.equals("Imported"))
+                	continue;
                 String clientName = readAsString(CLIENT_NAME_COL, row);
                 String clientId = getIdByName(workbook.getSheet("Clients"), clientName).toString();
                 String productName = readAsString(PRODUCT_COL, row);
@@ -89,7 +103,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 	fundId = "";
                 else
                     fundId = getIdByName(workbook.getSheet("Extras"), fundName).toString();
-                String principal = readAsString(PRINCIPAL_COL, row);
+                String principal = readAsDouble(PRINCIPAL_COL, row).toString();
                 String numberOfRepayments = readAsString(NO_OF_REPAYMENTS_COL, row);
                 String repaidEvery = readAsString(REPAID_EVERY_COL, row);
                 String repaidEveryFrequency = readAsString(REPAID_EVERY_FREQUENCY_COL, row);
@@ -148,10 +162,14 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 String graceOnInterestCharged = readAsString(GRACE_ON_INTEREST_CHARGED_COL, row);
                 String interestChargedFromDate = readAsDate(INTEREST_CHARGED_FROM_COL, row);
                 String firstRepaymentOnDate = readAsDate(FIRST_REPAYMENT_COL, row);
+                String repaymentAmount = readAsDouble(TOTAL_AMOUNT_REPAID_COL, row).toString();
+                String lastRepaymentDate = readAsDate(LAST_REPAYMENT_DATE_COL, row);
+                String repaymentType = readAsString(REPAYMENT_TYPE_COL, row);
+                String repaymentTypeId = getIdByName(workbook.getSheet("Extras"), repaymentType).toString();
                 
                 loans.add(new Loan(clientId, productId, loanOfficerId, submittedOnDate, fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyId, loanTerm,
                 		loanTermFrequencyId, nominalInterestRate, submittedOnDate, amortizationId, interestMethodId, interestCalculationPeriodId, arrearsTolerance, repaymentStrategyId,
-                		graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, rowIndex));
+                		graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, rowIndex, status));
                 if(!approvedDate.equals(""))
                    approvalDates.add(new LoanApproval(approvedDate, rowIndex));
                 else
@@ -159,7 +177,11 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 if(!disbursedDate.equals(""))
                    disbursalDates.add(new LoanDisbursal(disbursedDate, paymentTypeId, rowIndex));
                 else
-                   disbursalDates.add(rowIndex - 1, null);	
+                   disbursalDates.add(rowIndex - 1, null);
+                if(!repaymentAmount.equals(""))
+                   loanRepayments.add(new LoanRepayment(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex));
+                else
+                   loanRepayments.add(rowIndex - 1, null);	
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -172,32 +194,94 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     @Override
     public Result upload() {
         Result result = new Result();
+        Sheet loanSheet = workbook.getSheet("Loans");
+        CellStyle importedStyle = workbook.createCellStyle();
+        importedStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        importedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        CellStyle errorStyle = workbook.createCellStyle();
+        errorStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
+        errorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         restClient.createAuthToken();
+        int progressLevel = 0;
+        Integer loanId = 0;
         for (int i = 0; i < loans.size(); i++) {
             try {
+            	progressLevel = 0;
                 Gson gson = new Gson();
-                String payload = gson.toJson(loans.get(i));
-                logger.info(payload);
-                String response = restClient.post("loans", payload);
-                logger.info(response);
-                JsonParser parser = new JsonParser();
-                JsonObject obj = parser.parse(response).getAsJsonObject();
-                String loanId = obj.get("loanId").getAsString();
-                if(approvalDates.get(i) != null) {
-                   payload = gson.toJson(approvalDates.get(i));
-                   logger.info(payload);
-                   restClient.post("loans/" + loanId + "?command=approve", payload);
+                String payload ="", response = "";
+                String status = loans.get(i).getStatus();
+                if(status.equals("Creation failed.") || status.equals(""))
+                {
+                  payload = gson.toJson(loans.get(i));
+                  logger.info(payload);
+                  response = restClient.post("loans", payload);
+                  logger.info(response);
+                  progressLevel = 1;
+                
+                  JsonParser parser = new JsonParser();
+                  JsonObject obj = parser.parse(response).getAsJsonObject();
+                  loanId = Integer.parseInt(obj.get("loanId").getAsString());
+                } else {
+                	loanId = readAsInt(LOAN_ID_COL, loanSheet.getRow(loans.get(i).getRowIndex()));
                 }
-                if(approvalDates.get(i) != null && disbursalDates.get(i) != null) {
-                payload = gson.toJson(disbursalDates.get(i));
-                logger.info(payload);
-                restClient.post("loans/" + loanId + "?command=disburse", payload);
+                
+                if(status.equals("Approval failed.") || status.equals("Creation failed.") || status.equals(""))
+                {
+                  if(approvalDates.get(i) != null) {
+                     payload = gson.toJson(approvalDates.get(i));
+                     logger.info(payload);
+                     restClient.post("loans/" + loanId + "?command=approve", payload);
+                  }
+                  progressLevel = 2;
+                }  
+                
+                if(status.equals("Disbursal failed.") || status.equals("Approval failed.") || status.equals("Creation failed.") || status.equals(""))
+                {
+                  if(approvalDates.get(i) != null && disbursalDates.get(i) != null) {
+                  payload = gson.toJson(disbursalDates.get(i));
+                  logger.info(payload);
+                  restClient.post("loans/" + loanId + "?command=disburse", payload);
+                  }
+                  progressLevel = 3;
                 }
+                 
+                
+                if(loanRepayments.get(i) != null && approvalDates.get(i) != null && disbursalDates.get(i) != null) {
+                	  payload = gson.toJson(loanRepayments.get(i));
+                	  logger.info(payload);
+                	  restClient.post("loans/" + loanId + "/transactions?command=repayment", payload);
+                }
+                
+                Cell statusCell = loanSheet.getRow(loans.get(i).getRowIndex()).createCell(STATUS_COL);
+                statusCell.setCellValue("Imported");
+                statusCell.setCellStyle(importedStyle);
             } catch (Exception e) {
-            	logger.error("row = " + loans.get(i).getRowIndex(), e);
-                result.addError("Row = " + loans.get(i).getRowIndex() + " ," + e.getMessage());
+            	String message = parseStatus(e.getMessage());
+            	String status = "";
+            	Row row = loanSheet.getRow(loans.get(i).getRowIndex());
+            	Cell statusCell = row.createCell(STATUS_COL);
+            	if(progressLevel == 0)
+            		status = "Creation";
+            	else if(progressLevel == 1)
+            		status = "Approval";
+            	else if(progressLevel == 2)
+            		status = "Disbursal";
+            	else if(progressLevel == 3)
+            		status = "Repayment";
+                statusCell.setCellValue(status + " failed.");
+                statusCell.setCellStyle(errorStyle);
+                if(progressLevel>0)
+                	row.createCell(LOAN_ID_COL).setCellValue(loanId);
+            	Cell errorReportCell = row.createCell(FAILURE_REPORT_COL);
+            	errorReportCell.setCellValue(message);
+                result.addError("Row = " + loans.get(i).getRowIndex() + " ," + message);
             }
         }
+        loanSheet.setColumnWidth(STATUS_COL, 4000);
+        Row rowHeader = loanSheet.getRow(0);
+    	writeString(STATUS_COL, rowHeader, "Status");
+    	writeString(LOAN_ID_COL, rowHeader, "Loan ID");
+    	writeString(FAILURE_REPORT_COL, rowHeader, "Report");
         return result;
     }
 }

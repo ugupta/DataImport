@@ -73,7 +73,7 @@ public class MifosRestClient implements RestClient {
                 String content = readContentAndClose(response.getContent());
             if (response.getStatus() != HttpURLConnection.HTTP_OK) 
               { 
-            	throw new IllegalStateException("Failed : " + content);
+            	throw new IllegalStateException(content);
               }
             return content;
         } catch (IOException e) {
@@ -92,7 +92,7 @@ public class MifosRestClient implements RestClient {
     		      String content = readContentAndClose(response.getContent());
     		      if(response.getStatus() != HttpURLConnection.HTTP_OK)
     		      {
-    		    	  throw new IllegalStateException("Failed : " + content);
+    		    	  throw new IllegalStateException(content);
     		      }
     		      return content;
     	} catch (IOException e) {

@@ -3,6 +3,9 @@ package org.openmf.mifos.dataimport.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,10 +30,14 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     public static final int EXTERNAL_ID_COL = 5;
     public static final int ACTIVATION_DATE_COL = 6;
     public static final int ACTIVE_COL = 7;
+    public static final int STATUS_COL = 8;
 
     private List<Client> clients = new ArrayList<Client>();
     private List<CorporateClient> corporateClients = new ArrayList<CorporateClient>();
     private String clientType;
+    
+    private CellStyle importedStyle;
+    private CellStyle errorStyle;
     
     private final RestClient restClient;
     
@@ -54,6 +61,9 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
             Row row;
             try {
                 row = clientSheet.getRow(rowIndex);
+                String status = readAsString(STATUS_COL, row);
+                if(status.equals("Imported"))
+                	continue;
                 String officeName = readAsString(OFFICE_NAME_COL, row);
                 String officeId = getIdByName(workbook.getSheet("Offices"), officeName).toString();
                 String staffName = readAsString(STAFF_NAME_COL, row);
@@ -83,6 +93,13 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     @Override
     public Result upload() {
         Result result = new Result();
+        Sheet clientSheet = workbook.getSheet("Clients");
+        importedStyle = workbook.createCellStyle();
+        importedStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        importedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        errorStyle = workbook.createCellStyle();
+        errorStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
+        errorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         restClient.createAuthToken();
         if(clientType.equals("Individual"))
         for (Client client : clients) {
@@ -91,9 +108,15 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                 String payload = gson.toJson(client);
                 logger.info(payload);
                 restClient.post("clients", payload);
+                Cell statusCell = clientSheet.getRow(client.getRowIndex()).createCell(STATUS_COL);
+                statusCell.setCellValue("Imported");
+                statusCell.setCellStyle(importedStyle);
             } catch (Exception e) {
-                logger.error("row = " + client.getRowIndex(), e);
-                result.addError("Row = " + client.getRowIndex() + " ," + e.getMessage());
+            	String message = parseStatus(e.getMessage());
+            	Cell statusCell = clientSheet.getRow(client.getRowIndex()).createCell(STATUS_COL);
+            	statusCell.setCellValue(message);
+                statusCell.setCellStyle(errorStyle);
+                result.addError("Row = " + client.getRowIndex() + " ," + message);
             }
         }
         else {
@@ -103,14 +126,24 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                     String payload = gson.toJson(corporateClient);
                     logger.info(payload);
                     restClient.post("clients", payload);
+                    Cell statusCell = clientSheet.getRow(corporateClient.getRowIndex()).createCell(STATUS_COL);
+                    statusCell.setCellValue("Imported");
+                    statusCell.setCellStyle(importedStyle);
                 } catch (Exception e) {
-                    logger.error("row = " + corporateClient.getRowIndex(), e);
-                    result.addError("Row = " + corporateClient.getRowIndex() + " ," + e.getMessage());
-                }
+                	String message = parseStatus(e.getMessage());
+                	Cell statusCell = clientSheet.getRow(corporateClient.getRowIndex()).createCell(STATUS_COL);
+                	statusCell.setCellValue(message);
+                    statusCell.setCellStyle(errorStyle);
+                    result.addError("Row = " + corporateClient.getRowIndex() + " ," + message);                
+                    }
             }
         }
+        clientSheet.setColumnWidth(STATUS_COL, 15000);
+    	writeString(STATUS_COL, clientSheet.getRow(0), "Status");
         return result;
     }
+    
+
     
     public List<Client> getClients() {
         return clients;

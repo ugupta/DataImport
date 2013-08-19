@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.handler.DataImportHandler;
 import org.openmf.mifos.dataimport.handler.ImportFormatType;
 import org.openmf.mifos.dataimport.handler.ImportHandlerFactory;
@@ -27,6 +29,8 @@ public class DataImportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(DataImportServlet.class);
+    
+    private Workbook workbook;
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -37,9 +41,10 @@ public class DataImportServlet extends HttpServlet {
             filename = readFileName(part);
             ImportFormatType type = ImportFormatType.of(part.getContentType());
             InputStream content = part.getInputStream();
-            DataImportHandler handler = ImportHandlerFactory.createImportHandler(content, type);
+            workbook = new HSSFWorkbook(content);
+            DataImportHandler handler = ImportHandlerFactory.createImportHandler(workbook, type);
             Result result = parseAndUpload(handler);
-            writeResult(result, response.getOutputStream());
+            writeResult(result, response);
         } catch (IOException e) {
             throw new ServletException("Cannot import request. " + filename, e);
         }
@@ -64,14 +69,18 @@ public class DataImportServlet extends HttpServlet {
         return result;
     }
 
-    void writeResult(Result result, OutputStream stream) throws IOException {
+    void writeResult(Result result, HttpServletResponse response) throws IOException {
+    	OutputStream stream = response.getOutputStream();
         OutputStreamWriter out = new OutputStreamWriter(stream,"UTF-8");
         if(result.isSuccess()) {
             out.write("Import complete");
-        }
-        for(String e : result.getErrors()) {
-            out.write(e);
-            logger.debug("failed" + result);
+        } else {
+        for(String e : result.getErrors())
+            logger.debug("Failed: " + e);
+        String fileName = "Re-Upload.xls";
+		response.setContentType("application/vnd.ms-excel");
+		response.setHeader("Content-Disposition", "attachment;filename="+fileName);
+        workbook.write(stream);
         }
         out.flush();
         out.close();
