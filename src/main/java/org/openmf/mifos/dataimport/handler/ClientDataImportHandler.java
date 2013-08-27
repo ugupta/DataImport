@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -36,9 +35,6 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     private List<CorporateClient> corporateClients = new ArrayList<CorporateClient>();
     private String clientType;
     
-    private CellStyle importedStyle;
-    private CellStyle errorStyle;
-    
     private final RestClient restClient;
     
     private final Workbook workbook;
@@ -52,7 +48,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     public Result parse() {
         Result result = new Result();
         Sheet clientSheet = workbook.getSheet("Clients");
-        Integer noOfEntries = getNumberOfRows(clientSheet);
+        Integer noOfEntries = getNumberOfRows(clientSheet, 0);
         if(readAsString(FIRST_NAME_COL, clientSheet.getRow(0)).equals("First Name*"))
         	clientType = "Individual";
         else
@@ -94,12 +90,6 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
     public Result upload() {
         Result result = new Result();
         Sheet clientSheet = workbook.getSheet("Clients");
-        importedStyle = workbook.createCellStyle();
-        importedStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-        importedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        errorStyle = workbook.createCellStyle();
-        errorStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
-        errorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         restClient.createAuthToken();
         if(clientType.equals("Individual"))
         for (Client client : clients) {
@@ -110,12 +100,12 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                 restClient.post("clients", payload);
                 Cell statusCell = clientSheet.getRow(client.getRowIndex()).createCell(STATUS_COL);
                 statusCell.setCellValue("Imported");
-                statusCell.setCellStyle(importedStyle);
+                statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (Exception e) {
             	String message = parseStatus(e.getMessage());
             	Cell statusCell = clientSheet.getRow(client.getRowIndex()).createCell(STATUS_COL);
             	statusCell.setCellValue(message);
-                statusCell.setCellStyle(errorStyle);
+                statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.RED));
                 result.addError("Row = " + client.getRowIndex() + " ," + message);
             }
         }
@@ -128,12 +118,12 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
                     restClient.post("clients", payload);
                     Cell statusCell = clientSheet.getRow(corporateClient.getRowIndex()).createCell(STATUS_COL);
                     statusCell.setCellValue("Imported");
-                    statusCell.setCellStyle(importedStyle);
+                    statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
                 } catch (Exception e) {
                 	String message = parseStatus(e.getMessage());
                 	Cell statusCell = clientSheet.getRow(corporateClient.getRowIndex()).createCell(STATUS_COL);
                 	statusCell.setCellValue(message);
-                    statusCell.setCellStyle(errorStyle);
+                    statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.RED));
                     result.addError("Row = " + corporateClient.getRowIndex() + " ," + message);                
                     }
             }

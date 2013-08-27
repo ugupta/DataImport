@@ -6,6 +6,8 @@ public class LoanRepayment {
 
 	 private final transient Integer rowIndex;
 	 
+	 private final transient Integer loanAccountId;
+	 
 	 private final String transactionAmount;
 
 	 private final String transactionDate;
@@ -18,21 +20,32 @@ public class LoanRepayment {
 	 
 	 private final String note = "";
 	 
-	 private final String accountNumber = "";
+	 private final String accountNumber;
 	 
-	 private final String routingCode = "";
+	 private final String routingCode;
 	 
-	 private final String receiptNumber = "";
+	 private final String receiptNumber;
 	 
-	 private final String bankNumber = "";
+	 private final String bankNumber;
 	 
-	 private final String checkNumber = "";
+	 private final String checkNumber;
 	 
-	 public LoanRepayment(String transactionAmount, String transactionDate, String paymentTypeId, Integer rowIndex) {
+	    public LoanRepayment(String transactionAmount, String transactionDate, String paymentTypeId, String accountNumber,
+	    		String checkNumber, String routingCode, String receiptNumber, String bankNumber, Integer loanAccountId, Integer rowIndex) {
 		    this.transactionAmount = transactionAmount;
 	        this.transactionDate = transactionDate;
 	        this.paymentTypeId = paymentTypeId;
+	        this.accountNumber = accountNumber;
+	        this.checkNumber = checkNumber;
+	        this.routingCode = routingCode;
+	        this.receiptNumber = receiptNumber;
+	        this.bankNumber = bankNumber;
+	        this.loanAccountId = loanAccountId;
 	        this.rowIndex = rowIndex;
+	    }
+	 
+	    public LoanRepayment(String transactionAmount, String transactionDate, String paymentTypeId, Integer rowIndex) {
+	    	this(transactionAmount, transactionDate, paymentTypeId, "", "", "", "", "", 0, rowIndex);
 	    }
 	 
 	    public String getTransactionAmount() {
@@ -53,10 +66,6 @@ public class LoanRepayment {
 	    
 	    public String getDateFormat() {
 	    	return dateFormat;
-	    }
-
-	    public Integer getRowIndex() {
-	        return rowIndex;
 	    }
 	    
 	    public String getNote() {
@@ -82,4 +91,13 @@ public class LoanRepayment {
 	    public String getCheckNumber() {
 	    	return this.checkNumber;
 	    }
+
+	    public Integer getRowIndex() {
+	        return rowIndex;
+	    }
+	    
+	    public Integer getLoanAccountId() {
+	    	return loanAccountId;
+	    }
+	    
 }

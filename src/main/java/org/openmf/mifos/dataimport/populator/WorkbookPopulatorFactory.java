@@ -13,6 +13,8 @@ public class WorkbookPopulatorFactory {
 	             return new ClientWorkbookPopulator (parameter, new MifosRestClient());
 	        else if(template.trim().equals("loan"))
 	        	 return new LoanWorkbookPopulator(new MifosRestClient());
+	        else if(template.trim().equals("loanRepaymentHistory"))
+	        	 return new LoanRepaymentWorkbookPopulator(new MifosRestClient());
 	        throw new IllegalArgumentException(" Check ");
 	    }
 

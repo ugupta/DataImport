@@ -186,8 +186,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             rowHeader.getCell(REPAYMENT_TYPE_COL).setCellStyle(doubleBorderStyle);
 	    }
 	    
-	    private Result setDateLookupTable(Workbook workbook, Sheet loanSheet) {
-	    	Result result = new Result();
+	    private void setDateLookupTable(Workbook workbook, Sheet loanSheet) {
 	    	try {
 	    	CellStyle dateCellStyle = workbook.createCellStyle();
 	        short df = workbook.createDataFormat().getFormat("dd/mm/yy");
@@ -200,10 +199,8 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
     			writeDate(LOOKUP_ACTIVATION_DATE_COL, row, client.getActivationDate().get(2) + "/" + client.getActivationDate().get(1) + "/" + client.getActivationDate().get(0), dateCellStyle);
     		}
 	    	} catch (Exception e) {
-	    		result.addError(e.getMessage());
 	    		logger.error(e.getMessage());
 	    	}
-	    	return result;
 	    }
 	    
 	    private Result setRules(Sheet worksheet) {
@@ -239,11 +236,6 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	
 	        	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
 	        	Workbook loanWorkbook = worksheet.getWorkbook();
-	        	
-	        	//Office Name
-	        	Name officeGroup = loanWorkbook.createName();
-	        	officeGroup.setNameName("Office");
-	        	officeGroup.setRefersToFormula("Clients!$A$2:$A$" + (clientSheetPopulator.officeNames.size() + 1));
 	        	
 	        	ArrayList<String> officeNames = clientSheetPopulator.officeNames;
 	        	List<Product> products = productSheetPopulator.getProducts();
@@ -559,7 +551,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	DataValidation paymentTypeValidation = validationHelper.createValidation(paymentTypeConstraint, paymentTypeRange);
 	        	paymentTypeValidation.setSuppressDropDownArrow(false);
 	        	DataValidation repaymentTypeValidation = validationHelper.createValidation(paymentTypeConstraint, repaymentTypeRange);
-	        	paymentTypeValidation.setSuppressDropDownArrow(false);
+	        	repaymentTypeValidation.setSuppressDropDownArrow(false);
 	        	DataValidation submittedDateValidation = validationHelper.createValidation(submittedDateConstraint, submittedDateRange);
 	        	DataValidation approvalDateValidation = validationHelper.createValidation(approvalDateConstraint, approvedDateRange);
 	        	DataValidation disbursedDateValidation = validationHelper.createValidation(disbursedDateConstraint, disbursedDateRange);
@@ -615,25 +607,24 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    		for(Integer rowNo = 1; rowNo < 1000; rowNo++)
 	    		{
 	    			Row row = worksheet.createRow(rowNo);
-	    			row.createCell(FUND_NAME_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_Fund\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_Fund\")))");
-	    			row.createCell(PRINCIPAL_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_Principal\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_Principal\")))");
-	    			row.createCell(REPAID_EVERY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_EVERY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_EVERY\")))");
-	    			row.createCell(REPAID_EVERY_FREQUENCY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\")))");
-	    			row.createCell(NO_OF_REPAYMENTS_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_No_Repayment\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_No_Repayment\")))");
-	    			row.createCell(LOAN_TERM_COL).setCellFormula("IF(ISERROR($K" + (rowNo + 1) + "*$L" + (rowNo + 1) + "),\"\",$K" + (rowNo + 1) + "*$L" + (rowNo + 1) + ")");
-	    			row.createCell(LOAN_TERM_FREQUENCY_COL).setCellFormula("$M" + (rowNo + 1));
-	    			row.createCell(NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\")))");
-	    			row.createCell(NOMINAL_INTEREST_RATE_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\")))");
-	    			row.createCell(AMORTIZATION_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\")))");
-	    			row.createCell(INTEREST_METHOD_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_TYPE\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_TYPE\")))");
-	    			row.createCell(INTEREST_CALCULATION_PERIOD_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_CALCULATION\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_CALCULATION\")))");
-	    			row.createCell(ARREARS_TOLERANCE_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_ARREARS_TOLERANCE\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_ARREARS_TOLERANCE\")))");
-	    			row.createCell(REPAYMENT_STRATEGY_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_STRATEGY\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_STRATEGY\")))");
-	    			row.createCell(GRACE_ON_PRINCIPAL_PAYMENT_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_PRINCIPAL\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_PRINCIPAL\")))");
-	    			row.createCell(GRACE_ON_INTEREST_PAYMENT_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_PAYMENT\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_PAYMENT\")))");
-	    			row.createCell(GRACE_ON_INTEREST_CHARGED_COL).setCellFormula("IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_CHARGED\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_CHARGED\")))");
+	    			writeFormula(FUND_NAME_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_Fund\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_Fund\")))");
+	    			writeFormula(PRINCIPAL_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_Principal\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_Principal\")))");
+	    			writeFormula(REPAID_EVERY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_EVERY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_EVERY\")))");
+	    			writeFormula(REPAID_EVERY_FREQUENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_REPAYMENT_FREQUENCY\")))");
+	    			writeFormula(NO_OF_REPAYMENTS_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_No_Repayment\"))),\"\",INDIRECT(CONCATENATE($C"+ (rowNo + 1) + ",\"_No_Repayment\")))");
+	    			writeFormula(LOAN_TERM_COL, row, "IF(ISERROR($K" + (rowNo + 1) + "*$L" + (rowNo + 1) + "),\"\",$K" + (rowNo + 1) + "*$L" + (rowNo + 1) + ")");
+	    			writeFormula(LOAN_TERM_FREQUENCY_COL, row, "$M" + (rowNo + 1));
+	    			writeFormula(NOMINAL_INTEREST_RATE_FREQUENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_FREQUENCY\")))");
+	    			writeFormula(NOMINAL_INTEREST_RATE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST\")))");
+	    			writeFormula(AMORTIZATION_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_AMORTIZATION\")))");
+	    			writeFormula(INTEREST_METHOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_TYPE\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_TYPE\")))");
+	    			writeFormula(INTEREST_CALCULATION_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_CALCULATION\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_INTEREST_CALCULATION\")))");
+	    			writeFormula(ARREARS_TOLERANCE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_ARREARS_TOLERANCE\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_ARREARS_TOLERANCE\")))");
+	    			writeFormula(REPAYMENT_STRATEGY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_STRATEGY\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_STRATEGY\")))");
+	    			writeFormula(GRACE_ON_PRINCIPAL_PAYMENT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_PRINCIPAL\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_PRINCIPAL\")))");
+	    			writeFormula(GRACE_ON_INTEREST_PAYMENT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_PAYMENT\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_PAYMENT\")))");
+	    			writeFormula(GRACE_ON_INTEREST_CHARGED_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_CHARGED\"))),\"\",INDIRECT(CONCATENATE($C" + (rowNo + 1) + ",\"_GRACE_INTEREST_CHARGED\")))");
 	    		}
-	    		
 	    	} catch (Exception e) {
 	    		result.addError(e.getMessage());
 	    	}

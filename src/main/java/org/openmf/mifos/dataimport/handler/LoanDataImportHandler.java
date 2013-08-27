@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -77,7 +76,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     public Result parse() {
         Result result = new Result();
         Sheet loanSheet = workbook.getSheet("Loans");
-        Integer noOfEntries = getNumberOfRows(loanSheet);
+        Integer noOfEntries = getNumberOfRows(loanSheet, 0);
         logger.info(noOfEntries.toString());
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
@@ -195,15 +194,9 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     public Result upload() {
         Result result = new Result();
         Sheet loanSheet = workbook.getSheet("Loans");
-        CellStyle importedStyle = workbook.createCellStyle();
-        importedStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-        importedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        CellStyle errorStyle = workbook.createCellStyle();
-        errorStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
-        errorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         restClient.createAuthToken();
         int progressLevel = 0;
-        Integer loanId = 0;
+        String loanId = "";
         for (int i = 0; i < loans.size(); i++) {
             try {
             	progressLevel = 0;
@@ -220,7 +213,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 
                   JsonParser parser = new JsonParser();
                   JsonObject obj = parser.parse(response).getAsJsonObject();
-                  loanId = Integer.parseInt(obj.get("loanId").getAsString());
+                  loanId = obj.get("loanId").getAsString();
                 } else {
                 	loanId = readAsInt(LOAN_ID_COL, loanSheet.getRow(loans.get(i).getRowIndex()));
                 }
@@ -254,7 +247,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 
                 Cell statusCell = loanSheet.getRow(loans.get(i).getRowIndex()).createCell(STATUS_COL);
                 statusCell.setCellValue("Imported");
-                statusCell.setCellStyle(importedStyle);
+                statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (Exception e) {
             	String message = parseStatus(e.getMessage());
             	String status = "";
@@ -269,7 +262,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
             	else if(progressLevel == 3)
             		status = "Repayment";
                 statusCell.setCellValue(status + " failed.");
-                statusCell.setCellStyle(errorStyle);
+                statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.RED));
                 if(progressLevel>0)
                 	row.createCell(LOAN_ID_COL).setCellValue(loanId);
             	Cell errorReportCell = row.createCell(FAILURE_REPORT_COL);

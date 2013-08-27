@@ -5,8 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,18 +18,26 @@ import com.google.gson.JsonParser;
 
 public abstract class AbstractDataImportHandler implements DataImportHandler {
 
-    protected Integer getNumberOfRows(Sheet sheet) {
+    protected Integer getNumberOfRows(Sheet sheet, int primaryColumn) {
         Integer noOfEntries = 1;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
-        // sometimes.
-        while (sheet.getRow(noOfEntries).getCell(0) != null) {
-            noOfEntries++;
-        }
+        // sometimes
+           while (sheet.getRow(noOfEntries).getCell(primaryColumn) != null) {
+               noOfEntries++;
+           }
+        	
         return noOfEntries;
     }
 
-    protected int readAsInt(int colIndex, Row row) {
-        return ((Double) row.getCell(colIndex).getNumericCellValue()).intValue();
+    protected String readAsInt(int colIndex, Row row) {
+        try {
+        	Cell c = row.getCell(colIndex);
+        	if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        		return "";
+        	return ((Double) c.getNumericCellValue()).intValue() + "";
+        } catch (Exception e) {
+            return row.getCell(colIndex).getStringCellValue();
+        }
     }
     
     protected Double readAsDouble(int colIndex, Row row) {
@@ -63,6 +74,13 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     
     protected void writeString(int colIndex, Row row, String value) {
         row.createCell(colIndex).setCellValue(value);
+    }
+    
+    protected CellStyle getCellStyle(Workbook workbook, IndexedColors color) {
+    	CellStyle style = workbook.createCellStyle();
+        style.setFillForegroundColor(color.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        return style;
     }
     
     protected String parseStatus(String errorMessage) {

@@ -43,6 +43,14 @@ Data Import Tool
             <input type="submit"/>
 	</form>
     <h4>(Optional) Step 5 :</h4> Download template to help facilitate Loan Repayment History.
+    <form method="get" action="download" >
+     <input type="hidden" name="template" value="loanRepaymentHistory" > 
+     <input type="submit" value="Download"  />
+    </form>
+    <form method="post" action="import" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+	</form>
 </div>
 </div>
 </body>

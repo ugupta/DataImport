@@ -14,6 +14,8 @@ public class ImportHandlerFactory {
             	return new ClientDataImportHandler(workbook, new MifosRestClient());
         } else if(workbook.getSheetIndex("Loans") == 0) {
         	    return new LoanDataImportHandler(workbook, new MifosRestClient());
+        } else if(workbook.getSheetIndex("LoanRepayment") == 0) {
+        	    return new LoanRepaymentDataImportHandler(workbook, new MifosRestClient());
         }
         throw new IllegalArgumentException("No work sheet found for processing : active sheet " + workbook.getSheetName(0));
     }

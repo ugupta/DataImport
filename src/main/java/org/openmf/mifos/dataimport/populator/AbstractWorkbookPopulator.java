@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 
@@ -17,7 +18,15 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 	    protected void writeString(int colIndex, Row row, String value) {
 	            row.createCell(colIndex).setCellValue(value);
 	    }
+	    
+	    protected void writeDouble(int colIndex, Row row, double value) {
+	    	    row.createCell(colIndex).setCellValue(value);
+	    }
 
+	    protected void writeFormula(int colIndex, Row row, String formula) {
+	    	    row.createCell(colIndex).setCellType(Cell.CELL_TYPE_FORMULA);
+	    	    row.createCell(colIndex).setCellFormula(formula);
+	    }
 	    protected void writeDate(int colIndex, Row row, String value, CellStyle dateCellStyle) {
 	    	try {
 	    		//To make validation between functions inclusive.
