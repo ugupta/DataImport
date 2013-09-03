@@ -65,7 +65,18 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     	}  catch  (Exception e) {
     		return e.getMessage();
     	}
-    	
+    }
+    
+    protected String readAsDateWithoutYear(int colIndex, Row row) {
+    	try{
+    		Cell c = row.getCell(colIndex);
+    		if(c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+    			return "";
+    		DateFormat dateFormat = new SimpleDateFormat("dd MMMM");
+            return dateFormat.format(c.getDateCellValue());
+    	}  catch  (Exception e) {
+    		return e.getMessage();
+    	}
     }
     
     protected Boolean readAsBoolean(int colIndex, Row row) {

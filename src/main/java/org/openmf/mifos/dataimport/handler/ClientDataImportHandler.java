@@ -20,16 +20,16 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
            
 	private static final Logger logger = LoggerFactory.getLogger(ClientDataImportHandler.class);
 	
-	public static final int FIRST_NAME_COL = 0;
-	public static final int FULL_NAME_COL = 0;
-    public static final int LAST_NAME_COL = 1;
-    public static final int MIDDLE_NAME_COL = 2;
-    public static final int OFFICE_NAME_COL = 3;
-    public static final int STAFF_NAME_COL = 4;
-    public static final int EXTERNAL_ID_COL = 5;
-    public static final int ACTIVATION_DATE_COL = 6;
-    public static final int ACTIVE_COL = 7;
-    public static final int STATUS_COL = 8;
+	private static final int FIRST_NAME_COL = 0;
+	private static final int FULL_NAME_COL = 0;
+    private static final int LAST_NAME_COL = 1;
+    private static final int MIDDLE_NAME_COL = 2;
+    private static final int OFFICE_NAME_COL = 3;
+    private static final int STAFF_NAME_COL = 4;
+    private static final int EXTERNAL_ID_COL = 5;
+    private static final int ACTIVATION_DATE_COL = 6;
+    private static final int ACTIVE_COL = 7;
+    private static final int STATUS_COL = 8;
 
     private List<Client> clients = new ArrayList<Client>();
     private List<CorporateClient> corporateClients = new ArrayList<CorporateClient>();

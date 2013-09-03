@@ -33,8 +33,7 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
     private static final int ROUTING_CODE_COL = 10;	
     private static final int RECEIPT_NO_COL = 11;
     private static final int BANK_NO_COL = 12;
-    public static final int STATUS_COL = 13;
-    public static final int FAILURE_REPORT_COL = 14;
+    private static final int STATUS_COL = 13;
 
     public LoanRepaymentDataImportHandler(Workbook workbook, RestClient client) {
         this.workbook = workbook;
