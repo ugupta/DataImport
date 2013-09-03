@@ -30,16 +30,16 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
 
     private String content;
     
-    public List<GeneralClient> clients = new ArrayList<GeneralClient>();
-    public ArrayList<String> officeNames;
+    private List<GeneralClient> clients = new ArrayList<GeneralClient>();
+    private ArrayList<String> officeNames;
     
     private Map<String, ArrayList<String>> officeToClients;
-    public Map<Integer, Integer> lastColumnLetters;
-    public Map<String, Integer> nameToId;
+    private Map<Integer, Integer> lastColumnLetters;
+    private Map<String, Integer> nameToId;
     
-    public static final int OFFICE_NAME_COL = 0;
-    public static final int CLIENT_NAME_COL = 1;
-    public static final int NOTICE_COL = 2;
+    private static final int OFFICE_NAME_COL = 0;
+    private static final int CLIENT_NAME_COL = 1;
+    private static final int NOTICE_COL = 2;
 	
 	public ClientSheetPopulator(RestClient restClient) {
     	this.restClient = restClient;
@@ -162,5 +162,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     
     public String[] getOfficeNames() {
         return officeNames.toArray(new String[officeNames.size()]);
+    }
+    
+    public Map<Integer, Integer> getLastColumnLetters() {
+    	return lastColumnLetters;
     }
 }

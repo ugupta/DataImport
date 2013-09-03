@@ -8,7 +8,7 @@ margin-bottom: 0px;	-moz-border-radius: 44px; -webkit-border-radius: 44px; borde
 div#container{	z-index:2;overflow:hidden;width:1090px;margin:70px auto 20px;background:#fff;-moz-border-radius: 8px;-webkit-border-radius: 8px;border-radius: 8px;-moz-background-clip: padding;
 -webkit-background-clip: padding-box;background-clip: padding-box;background-color: #fff;-moz-box-shadow:0 1px 4px rgba(0,0,0,.33),0 0 0 1px rgba(46,45,47,.05),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.5);-webkit-box-shadow:0 1px 4px rgba(0,0,0,.33),0 0 0 1px rgba(46,45,47,.05),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.5);box-shadow:0 1px 4px rgba(0,0,0,.33),
 0 0 0 1px rgba(46,45,47,.05),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(255,255,255,.5);}
-div#content {font-family:Helvetica Neue, Arial, sans-serif;	height: 800px;	background-image: url(../img/checkmark_big.png);background-repeat:no-repeat;background-position:420px 30px;	padding: 20px 50px 0 80px;}
+div#content {font-family:Helvetica Neue, Arial, sans-serif;	height: 1300px;	padding: 20px 50px 0 80px;}
 </style>
 </head>
 <body style="background-color:f9f9f9;">
@@ -31,7 +31,7 @@ Data Import Tool
             <input type="file" name="file"/>
             <input type="submit"/>
 	</form>
-	<h4>Step 3 :</h4> Enter your Currency Configuration, Funds, Charges, Loan Product configuration (Administration -&gt; Organisation) and Payment Types (Administration -&gt; System -&gt; View Code -&gt;Add/Edit Code Value) through the front-end app provided with MifosX.
+	<h4>Step 3 :</h4> Enter your Currency Configuration, Funds, Charges, Loan Product configuration (Administration -&gt; Organisation) and Payment Types (Administration -&gt; System -&gt; View Code -&gt;Add/Edit Code Value) through the UI.
 	<h4>Step 4 :</h4> Download template to help facilitate Loan Import. <br><br>
     For quick import of outstanding balances of each loan, use the entire template <b>OR</b> leave the last 3 columns empty and proceed to Step 5 for importing complete repayment history for each loan.
 	<form method="get" action="download" >
@@ -42,9 +42,30 @@ Data Import Tool
             <input type="file" name="file"/>
             <input type="submit"/>
 	</form>
-    <h4>(Optional) Step 5 :</h4> Download template to help facilitate Loan Repayment History.
+    <h4>(Optional) Step 5 :</h4> Download template to help facilitate import of Loan Repayment History.
     <form method="get" action="download" >
      <input type="hidden" name="template" value="loanRepaymentHistory" > 
+     <input type="submit" value="Download"  />
+    </form>
+    <form method="post" action="import" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+	</form>
+	
+	<h4>Step 6 :</h4> Enter your Savings Product configuration (Administration -&gt; Organisation) through the UI.
+	<h4>Step 7 :</h4> Download template to help facilitate Savings Import. <br><br>
+    For quick import of current balances of each savings account, use the entire template <b>OR</b> leave the last 3 columns empty and proceed to Step 8 for importing complete transaction history for each savings account.
+	<form method="get" action="download" >
+     <input type="hidden" name="template" value="savings" > 
+     <input type="submit" value="Download"  />
+    </form>
+    <form method="post" action="import" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+	</form>
+    <h4>(Optional) Step 8 :</h4> Download template to help facilitate import of Savings Transaction History.
+    <form method="get" action="download" >
+     <input type="hidden" name="template" value="savingsTransactionHistory" > 
      <input type="submit" value="Download"  />
     </form>
     <form method="post" action="import" enctype="multipart/form-data">

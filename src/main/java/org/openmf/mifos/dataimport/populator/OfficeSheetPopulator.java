@@ -33,12 +33,12 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private Map<Integer,String> idToName;
 	
-	public static final int ID_COL = 0;
-	public static final int OFFICE_NAME_COL = 1;
-	public static final int EXTERNAL_ID_COL = 2;
-	public static final int OPENING_DATE_COL = 3;
-    public static final int PARENT_NAME_COL = 4;
-    public static final int HIERARCHY_COL = 5;
+	private static final int ID_COL = 0;
+	private static final int OFFICE_NAME_COL = 1;
+	private static final int EXTERNAL_ID_COL = 2;
+	private static final int OPENING_DATE_COL = 3;
+    private static final int PARENT_NAME_COL = 4;
+    private static final int HIERARCHY_COL = 5;
 
     public OfficeSheetPopulator(RestClient client) {
         this.client = client;

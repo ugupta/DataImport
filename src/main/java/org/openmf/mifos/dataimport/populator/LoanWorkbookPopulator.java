@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
@@ -18,7 +19,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.GeneralClient;
-import org.openmf.mifos.dataimport.dto.Product;
+import org.openmf.mifos.dataimport.dto.LoanProduct;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
@@ -32,51 +33,51 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	
 	private ClientSheetPopulator clientSheetPopulator;
 	private PersonnelSheetPopulator personnelSheetPopulator;
-	private ProductSheetPopulator productSheetPopulator;
+	private LoanProductSheetPopulator productSheetPopulator;
 	private ExtrasSheetPopulator extrasSheetPopulator;
 	
-	public static final int OFFICE_NAME_COL = 0;
-    public static final int CLIENT_NAME_COL = 1;
-    public static final int PRODUCT_COL = 2;
-    public static final int LOAN_OFFICER_NAME_COL = 3;
-    public static final int SUBMITTED_ON_DATE_COL = 4;
-    public static final int APPROVED_DATE_COL = 5;
-    public static final int DISBURSED_DATE_COL = 6;
-    public static final int DISBURSED_PAYMENT_TYPE_COL = 7;
-    public static final int FUND_NAME_COL = 8;
-    public static final int PRINCIPAL_COL = 9;
-    public static final int NO_OF_REPAYMENTS_COL = 10;
-    public static final int REPAID_EVERY_COL = 11;
-    public static final int REPAID_EVERY_FREQUENCY_COL = 12;
-    public static final int LOAN_TERM_COL = 13;
-    public static final int LOAN_TERM_FREQUENCY_COL = 14;
-    public static final int NOMINAL_INTEREST_RATE_COL = 15;
-    public static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 16;
-    public static final int AMORTIZATION_COL = 17;
-    public static final int INTEREST_METHOD_COL = 18;
-    public static final int INTEREST_CALCULATION_PERIOD_COL = 19;
-    public static final int ARREARS_TOLERANCE_COL = 20;
-    public static final int REPAYMENT_STRATEGY_COL = 21;
-    public static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 22;
-    public static final int GRACE_ON_INTEREST_PAYMENT_COL = 23;
-    public static final int GRACE_ON_INTEREST_CHARGED_COL = 24;
-    public static final int INTEREST_CHARGED_FROM_COL = 25;
-    public static final int FIRST_REPAYMENT_COL = 26;
-    public static final int TOTAL_AMOUNT_REPAID_COL = 27;
-    public static final int LAST_REPAYMENT_DATE_COL = 28;
-    public static final int REPAYMENT_TYPE_COL = 29;
-    public static final int LOOKUP_CLIENT_NAME_COL = 42;
-    public static final int LOOKUP_ACTIVATION_DATE_COL = 43;
+	private static final int OFFICE_NAME_COL = 0;
+    private static final int CLIENT_NAME_COL = 1;
+    private static final int PRODUCT_COL = 2;
+    private static final int LOAN_OFFICER_NAME_COL = 3;
+    private static final int SUBMITTED_ON_DATE_COL = 4;
+    private static final int APPROVED_DATE_COL = 5;
+    private static final int DISBURSED_DATE_COL = 6;
+    private static final int DISBURSED_PAYMENT_TYPE_COL = 7;
+    private static final int FUND_NAME_COL = 8;
+    private static final int PRINCIPAL_COL = 9;
+    private static final int NO_OF_REPAYMENTS_COL = 10;
+    private static final int REPAID_EVERY_COL = 11;
+    private static final int REPAID_EVERY_FREQUENCY_COL = 12;
+    private static final int LOAN_TERM_COL = 13;
+    private static final int LOAN_TERM_FREQUENCY_COL = 14;
+    private static final int NOMINAL_INTEREST_RATE_COL = 15;
+    private static final int NOMINAL_INTEREST_RATE_FREQUENCY_COL = 16;
+    private static final int AMORTIZATION_COL = 17;
+    private static final int INTEREST_METHOD_COL = 18;
+    private static final int INTEREST_CALCULATION_PERIOD_COL = 19;
+    private static final int ARREARS_TOLERANCE_COL = 20;
+    private static final int REPAYMENT_STRATEGY_COL = 21;
+    private static final int GRACE_ON_PRINCIPAL_PAYMENT_COL = 22;
+    private static final int GRACE_ON_INTEREST_PAYMENT_COL = 23;
+    private static final int GRACE_ON_INTEREST_CHARGED_COL = 24;
+    private static final int INTEREST_CHARGED_FROM_COL = 25;
+    private static final int FIRST_REPAYMENT_COL = 26;
+    private static final int TOTAL_AMOUNT_REPAID_COL = 27;
+    private static final int LAST_REPAYMENT_DATE_COL = 28;
+    private static final int REPAYMENT_TYPE_COL = 29;
+    private static final int LOOKUP_CLIENT_NAME_COL = 42;
+    private static final int LOOKUP_ACTIVATION_DATE_COL = 43;
 	
 	public LoanWorkbookPopulator(RestClient restClient) {
     	this.restClient = restClient;
     }
 	
-	 @Override
+	    @Override
 	    public Result downloadAndParse() {
 	    	clientSheetPopulator = new ClientSheetPopulator(restClient);
 	    	personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.TRUE, restClient);
-	    	productSheetPopulator = new ProductSheetPopulator(restClient);
+	    	productSheetPopulator = new LoanProductSheetPopulator(restClient);
 	    	extrasSheetPopulator = new ExtrasSheetPopulator(restClient);
 	    	Result result =  clientSheetPopulator.downloadAndParse();
 	    	if(result.isSuccess())
@@ -237,14 +238,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
 	        	Workbook loanWorkbook = worksheet.getWorkbook();
 	        	
-	        	ArrayList<String> officeNames = clientSheetPopulator.officeNames;
-	        	List<Product> products = productSheetPopulator.getProducts();
+	        	ArrayList<String> officeNames = new ArrayList<String>(Arrays.asList(clientSheetPopulator.getOfficeNames()));
+	        	List<LoanProduct> products = productSheetPopulator.getProducts();
 	        	
 	        	//Client Name
 	        	Name[] clientGroups = new Name[officeNames.size()];
 	        	ArrayList<String> formulas = new ArrayList<String>();
 	        	for(Integer i = 0, j = 2; i < officeNames.size(); i++, j = j + 2) {
-	        		String lastColumnLetters = CellReference.convertNumToColString(clientSheetPopulator.lastColumnLetters.get(i));
+	        		String lastColumnLetters = CellReference.convertNumToColString(clientSheetPopulator.getLastColumnLetters().get(i));
 	        		formulas.add("Clients!$B$" + j + ":$" + lastColumnLetters + "$" + j);
 	        		clientGroups[i] = loanWorkbook.createName();
 	        	    clientGroups[i].setNameName(officeNames.get(i));
@@ -260,7 +261,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	Name[] loanOfficerGroups = new Name[officeNames.size()];
 	        	formulas = new ArrayList<String>();
 	        	for(Integer i = 0, j = 2; i < officeNames.size(); i++, j = j + 2) {
-	        		String lastColumnLetters = CellReference.convertNumToColString(personnelSheetPopulator.lastColumnLetters.get(i));
+	        		String lastColumnLetters = CellReference.convertNumToColString(personnelSheetPopulator.getLastColumnLetters().get(i));
 	        		formulas.add("Staff!$B$" + j + ":$" + lastColumnLetters + "$" + j);
 	        		loanOfficerGroups[i] = loanWorkbook.createName();
 	        	    loanOfficerGroups[i].setNameName(officeNames.get(i)+"X");

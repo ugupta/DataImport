@@ -26,18 +26,18 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClientWorkbookPopulator.class);
 
-	public static final int FIRST_NAME_COL = 0;
-    public static final int LAST_NAME_COL = 1;
-    public static final int MIDDLE_NAME_COL = 2;
-    public static final int FULL_NAME_COL = 0;
-    public static final int OFFICE_NAME_COL = 3;
-    public static final int STAFF_NAME_COL = 4;
-    public static final int EXTERNAL_ID_COL = 5;
-    public static final int ACTIVATION_DATE_COL = 6;
-    public static final int ACTIVE_COL = 7;
-    public static final int WARNING_COL = 9;
-    public static final int RELATIONAL_OFFICE_NAME_COL = 16;
-    public static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 17;
+	private static final int FIRST_NAME_COL = 0;
+    private static final int LAST_NAME_COL = 1;
+    private static final int MIDDLE_NAME_COL = 2;
+    private static final int FULL_NAME_COL = 0;
+    private static final int OFFICE_NAME_COL = 3;
+    private static final int STAFF_NAME_COL = 4;
+    private static final int EXTERNAL_ID_COL = 5;
+    private static final int ACTIVATION_DATE_COL = 6;
+    private static final int ACTIVE_COL = 7;
+    private static final int WARNING_COL = 9;
+    private static final int RELATIONAL_OFFICE_NAME_COL = 16;
+    private static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 17;
 
 	private final RestClient client;
 	private final String clientType;
@@ -153,7 +153,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     	Name[] staffGroups = new Name[offices.size()];
     	ArrayList<String> formulas = new ArrayList<String>();
     	for(Integer i = 0, j = 2; i < offices.size(); i++, j = j+2) {
-    		String lastColumnLetters = CellReference.convertNumToColString(personnelSheetPopulator.lastColumnLetters.get(i));
+    		String lastColumnLetters = CellReference.convertNumToColString(personnelSheetPopulator.getLastColumnLetters().get(i));
     		formulas.add("Staff!$B$" + j + ":$" + lastColumnLetters + "$" + j);
     		staffGroups[i] = clientWorkbook.createName();
     	    staffGroups[i].setNameName(offices.get(i).getName().trim().replaceAll("[ )(]", "_"));

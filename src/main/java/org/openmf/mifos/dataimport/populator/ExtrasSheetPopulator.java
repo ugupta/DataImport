@@ -30,10 +30,10 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
 	private List<Fund> funds;
 	private List<PaymentType> paymentTypes;
 	
-	public static final int FUND_ID_COL = 0;
-	public static final int FUND_NAME_COL = 1;
-	public static final int PAYMENT_TYPE_ID_COL = 2;
-	public static final int PAYMENT_TYPE_NAME_COL = 3;
+	private static final int FUND_ID_COL = 0;
+	private static final int FUND_NAME_COL = 1;
+	private static final int PAYMENT_TYPE_ID_COL = 2;
+	private static final int PAYMENT_TYPE_NAME_COL = 3;
 	
 	public ExtrasSheetPopulator(RestClient client) {
         this.client = client;

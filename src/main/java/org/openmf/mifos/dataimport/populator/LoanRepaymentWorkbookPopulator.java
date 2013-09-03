@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -175,13 +176,13 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         	
         	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
         	Workbook loanRepaymentWorkbook = worksheet.getWorkbook();
-        	ArrayList<String> officeNames = clientSheetPopulator.officeNames;
+        	ArrayList<String> officeNames = new ArrayList<String>(Arrays.asList(clientSheetPopulator.getOfficeNames()));
         	
         	//Clients Named after Offices
         	Name[] clientGroups = new Name[officeNames.size()];
         	ArrayList<String> formulas = new ArrayList<String>();
         	for(Integer i = 0, j = 2; i < officeNames.size(); i++, j = j + 2) {
-        		String lastColumnLetters = CellReference.convertNumToColString(clientSheetPopulator.lastColumnLetters.get(i));
+        		String lastColumnLetters = CellReference.convertNumToColString(clientSheetPopulator.getLastColumnLetters().get(i));
         		formulas.add("Clients!$B$" + j + ":$" + lastColumnLetters + "$" + j);
         		clientGroups[i] = loanRepaymentWorkbook.createName();
         	    clientGroups[i].setNameName(officeNames.get(i));

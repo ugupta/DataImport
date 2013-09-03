@@ -15,7 +15,9 @@ public class WorkbookPopulatorFactory {
 	        	 return new LoanWorkbookPopulator(new MifosRestClient());
 	        else if(template.trim().equals("loanRepaymentHistory"))
 	        	 return new LoanRepaymentWorkbookPopulator(new MifosRestClient());
-	        throw new IllegalArgumentException(" Check ");
+	        else if(template.trim().equals("savings"))
+	        	 return new SavingsWorkbookPopulator(new MifosRestClient());
+	        throw new IllegalArgumentException(" Can't find populator. ");
 	    }
 
 }

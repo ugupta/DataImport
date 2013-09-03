@@ -35,14 +35,14 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	
 	//Maintaining the one to many relationship
 	private Map<String, ArrayList<String>> officeToPersonnel;
-	public Map<String, Integer> nameToId;
+	private Map<String, Integer> nameToId;
 	
-	public Map<Integer, Integer> lastColumnLetters;
+	private Map<Integer, Integer> lastColumnLetters;
 	private Map<Integer,String> idToName;
 	
-	public static final int OFFICE_NAME_COL = 0;
-	public static final int STAFF_LIST_START_COL = 1;
-	public static final int NOTICE_COL = 2;
+	private static final int OFFICE_NAME_COL = 0;
+	private static final int STAFF_LIST_START_COL = 1;
+	private static final int NOTICE_COL = 2;
 	
 	public PersonnelSheetPopulator(Boolean onlyLoanOfficers, RestClient client) {
 		this.onlyLoanOfficers = onlyLoanOfficers;
@@ -70,7 +70,6 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	            		   personnel.add(person);
 	            	}
 	            	nameToId.put(person.getFirstName() + " " +person.getLastName(), person.getId());
-	            	logger.info("CHECK : " + person.toString());
 	            }
 	            offices = new ArrayList<Office>();
 	            content = client.get("offices");
@@ -83,7 +82,6 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	            	Office office = gson.fromJson(json, Office.class);
 	            	idToName.put(office.getId(), office.getName());
 	            	offices.add(office);
-	            	logger.info("CHECK : "+office.toString());
 	            }
 	        } catch (Exception e) {
 	            result.addError(e.getMessage());
