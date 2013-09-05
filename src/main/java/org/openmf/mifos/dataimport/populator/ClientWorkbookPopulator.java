@@ -1,6 +1,5 @@
 package org.openmf.mifos.dataimport.populator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
@@ -38,8 +37,7 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     private static final int WARNING_COL = 9;
     private static final int RELATIONAL_OFFICE_NAME_COL = 16;
     private static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 17;
-
-	private final RestClient client;
+    
 	private final String clientType;
 
 	private OfficeSheetPopulator officeSheetPopulator;
@@ -48,13 +46,13 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
     public ClientWorkbookPopulator(String clientType, RestClient client) {
     	this.clientType = clientType;
-        this.client = client;
+    	officeSheetPopulator = new OfficeSheetPopulator(client);
+        personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.FALSE, client);
     }
 
     @Override
     public Result downloadAndParse() {
-    	officeSheetPopulator = new OfficeSheetPopulator(client);
-        personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.FALSE, client);
+    	
     	Result result = officeSheetPopulator.downloadAndParse();
     	if(result.isSuccess()) {
     	   result = personnelSheetPopulator.downloadAndParse();
@@ -150,14 +148,11 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     	Name lookupTable = clientWorkbook.createName();
     	lookupTable.setNameName("LOOKUP_TABLE");
     	lookupTable.setRefersToFormula("Offices!$B$2:$D$" + (offices.size() + 1));
-    	Name[] staffGroups = new Name[offices.size()];
-    	ArrayList<String> formulas = new ArrayList<String>();
     	for(Integer i = 0, j = 2; i < offices.size(); i++, j = j+2) {
     		String lastColumnLetters = CellReference.convertNumToColString(personnelSheetPopulator.getLastColumnLetters().get(i));
-    		formulas.add("Staff!$B$" + j + ":$" + lastColumnLetters + "$" + j);
-    		staffGroups[i] = clientWorkbook.createName();
-    	    staffGroups[i].setNameName(offices.get(i).getName().trim().replaceAll("[ )(]", "_"));
-    	    staffGroups[i].setRefersToFormula(formulas.get(i));
+    		Name name = clientWorkbook.createName();
+    	    name.setNameName(offices.get(i).getName().trim().replaceAll("[ )(]", "_"));
+    	    name.setRefersToFormula("Staff!$B$" + j + ":$" + lastColumnLetters + "$" + j);
     	}
 
     	DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
@@ -179,8 +174,8 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.addValidationData(officeValidation);
         worksheet.addValidationData(staffValidation);
         worksheet.addValidationData(activationDateValidation);
-    	} catch (Exception e) {
-    		result.addError(e.getMessage());
+    	} catch (RuntimeException re) {
+    		result.addError(re.getMessage());
     	}
        return result;
     }

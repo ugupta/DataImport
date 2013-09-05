@@ -24,6 +24,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LoanDataImportHandler.class);
 	
+	@SuppressWarnings("CPD-START")
     private static final int CLIENT_NAME_COL = 1;
     private static final int PRODUCT_COL = 2;
     private static final int LOAN_OFFICER_NAME_COL = 3;
@@ -32,7 +33,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     private static final int DISBURSED_DATE_COL = 6;
     private static final int DISBURSED_PAYMENT_TYPE_COL = 7;
     private static final int FUND_NAME_COL = 8;
-    private static final int PRINCIPAL_COL = 9;
+    private static final int PRINCIPAL_COL = 9;  
     private static final int NO_OF_REPAYMENTS_COL = 10;
     private static final int REPAID_EVERY_COL = 11;
     private static final int REPAID_EVERY_FREQUENCY_COL = 12;
@@ -55,6 +56,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     private static final int STATUS_COL = 30;
     private static final int LOAN_ID_COL = 31;
     private static final int FAILURE_REPORT_COL = 32;
+    @SuppressWarnings("CPD-END")
     
     private List<Loan> loans = new ArrayList<Loan>();
     private List<LoanApproval> approvalDates = new ArrayList<LoanApproval>();
@@ -179,9 +181,9 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                    loanRepayments.add(new LoanRepayment(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex));
                 else
                    loanRepayments.add(rowIndex - 1, null);	
-            } catch (Exception e) {
-                logger.error("row = " + rowIndex, e);
-                result.addError("Row = " + rowIndex + " , " + e.getMessage());
+            } catch (RuntimeException re) {
+                logger.error("row = " + rowIndex, re);
+                result.addError("Row = " + rowIndex + " , " + re.getMessage());
             }
         }
     
@@ -246,8 +248,8 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 Cell statusCell = loanSheet.getRow(loans.get(i).getRowIndex()).createCell(STATUS_COL);
                 statusCell.setCellValue("Imported");
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            } catch (Exception e) {
-            	String message = parseStatus(e.getMessage());
+            } catch (RuntimeException re) {
+            	String message = parseStatus(re.getMessage());
             	String status = "";
             	Row row = loanSheet.getRow(loans.get(i).getRowIndex());
             	Cell statusCell = row.createCell(STATUS_COL);

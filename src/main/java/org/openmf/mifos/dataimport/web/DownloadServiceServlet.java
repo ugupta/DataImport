@@ -20,9 +20,7 @@ import org.openmf.mifos.dataimport.populator.WorkbookPopulatorFactory;
 public class DownloadServiceServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 2L;
-	
-	private Workbook workbook;
-    
+	  
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
@@ -33,28 +31,28 @@ public class DownloadServiceServlet extends HttpServlet {
 		if(request.getParameter("template").equals("client"))
 		    parameter = request.getParameter("clientType");
 		WorkbookPopulator populator = WorkbookPopulatorFactory.createWorkbookPopulator(parameter, fileName);
-        Result result = downloadAndPopulate(populator);
+		Workbook workbook = new HSSFWorkbook();
+        Result result = downloadAndPopulate(workbook, populator);
 		fileName=fileName+".xls";
-		response.setContentType("application/vnd.ms-excel");
-		response.setHeader("Content-Disposition", "attachment;filename="+fileName);
-		writeToStream(result, response.getOutputStream());
-		
+		writeToStream(workbook, result, response, fileName);
 		}catch(Exception e){
 			throw new ServletException("Cannot download template - " + fileName, e);
 		}
 	}
 	
-	Result downloadAndPopulate(WorkbookPopulator populator) throws IOException {
+	Result downloadAndPopulate(Workbook workbook, WorkbookPopulator populator) throws IOException {
         Result result = populator.downloadAndParse();
         if(result.isSuccess()) {
-          workbook = new HSSFWorkbook();
           result = populator.populate(workbook);
         }
         return result;
     }
 	
-	 void writeToStream(Result result, OutputStream stream) throws IOException {
+	 void writeToStream(Workbook workbook, Result result, HttpServletResponse response, String fileName) throws IOException {
+		 OutputStream stream = response.getOutputStream();
 		 if(result.isSuccess()) {
+			     response.setContentType("application/vnd.ms-excel");
+				 response.setHeader("Content-Disposition", "attachment;filename="+fileName);
 	             workbook.write(stream);
 	             stream.flush();
 	 	         stream.close();

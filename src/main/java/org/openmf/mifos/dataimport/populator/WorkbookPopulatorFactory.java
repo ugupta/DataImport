@@ -19,5 +19,4 @@ public class WorkbookPopulatorFactory {
 	        	 return new SavingsWorkbookPopulator(new MifosRestClient());
 	        throw new IllegalArgumentException(" Can't find populator. ");
 	    }
-
 }

@@ -19,13 +19,14 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SavingsDataImportHandler.class);
 	
+	@SuppressWarnings("CPD-START")
 	private static final int CLIENT_NAME_COL = 1;
     private static final int PRODUCT_COL = 2;
     private static final int FIELD_OFFICER_NAME_COL = 3;
     private static final int SUBMITTED_ON_DATE_COL = 4;
-    private static final int APPROVED_DATE_COL = 5;
-    private static final int ACTIVATION_DATE_COL = 6;
-    private static final int NOMINAL_ANNUAL_INTEREST_RATE_COL = 7;
+//    private static final int APPROVED_DATE_COL = 5;
+//    private static final int ACTIVATION_DATE_COL = 6;
+    private static final int NOMINAL_ANNUAL_INTEREST_RATE_COL = 7; 
 	private static final int INTEREST_COMPOUNDING_PERIOD_COL = 8;
 	private static final int INTEREST_POSTING_PERIOD_COL = 9;
 	private static final int INTEREST_CALCULATION_COL = 10;
@@ -39,6 +40,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
 	private static final int ANNUAL_FEE_ON_MONTH_DAY_COL = 18;
 	private static final int STATUS_COL = 19;
     private static final int FAILURE_REPORT_COL = 20;
+    @SuppressWarnings("CPD-END")
 
     private final RestClient restClient;
     
@@ -70,8 +72,8 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 String fieldOfficerName = readAsString(FIELD_OFFICER_NAME_COL, row);
                 String fieldOfficerId = getIdByName(workbook.getSheet("Staff"), fieldOfficerName).toString();
                 String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
-                String approvalDate = readAsDate(APPROVED_DATE_COL, row);
-                String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
+//                String approvalDate = readAsDate(APPROVED_DATE_COL, row);
+//                String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
                 String nominalAnnualInterestRate = readAsString(NOMINAL_ANNUAL_INTEREST_RATE_COL, row);
                 String interestCompoundingPeriodType = readAsString(INTEREST_COMPOUNDING_PERIOD_COL, row);
                 String interestCompoundingPeriodTypeId = "";
@@ -100,7 +102,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 else if(interestCalculationDaysInYearType.equals("365 Days"))
                 	interestCalculationDaysInYearTypeId = "365";
                 String minRequiredOpeningBalance = readAsString(MIN_OPENING_BALANCE_COL, row);
-                String lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row);
+                String lockinPeriodFrequency = (lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row)).equals("0") ? "" : lockinPeriodFrequency;
                 String lockinPeriodFrequencyType = readAsString(LOCKIN_PERIOD_FREQUENCY_COL, row);
                 String lockinPeriodFrequencyTypeId = "";
                 if(lockinPeriodFrequencyType.equals("Days"))
@@ -111,21 +113,21 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 	lockinPeriodFrequencyTypeId = "2";
                 else if(lockinPeriodFrequencyType.equals("Years"))
                 	lockinPeriodFrequencyTypeId = "3";
-                String withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row);
+                String withdrawalFeeAmount = (withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row)).equals("0") ? "" : withdrawalFeeAmount;
                 String withdrawalFeeType = readAsString(WITHDRAWAL_FEE_TYPE_COL, row);
                 String withdrawalFeeTypeId = "";
                 if(withdrawalFeeType.equals("Flat"))
                 	withdrawalFeeTypeId = "1";
                 else if(withdrawalFeeType.equals("% of Amount"))
                 	withdrawalFeeTypeId = "2";
-                String annualFeeAmount = readAsString(ANNUAL_FEE_COL, row);
-                String annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row);
+                String annualFeeAmount = (annualFeeAmount = readAsString(ANNUAL_FEE_COL, row)).equals("0") ? "" : annualFeeAmount;
+                String annualFeeOnMonthDay = (annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row)).equals("31 December") ? "" : annualFeeOnMonthDay;
                 savings.add(new Savings(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
                 		interestCalculationTypeId, interestCalculationDaysInYearTypeId, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeId, withdrawalFeeAmount,
                 		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, rowIndex, status));
-            } catch (Exception e) {
-                logger.error("row = " + rowIndex, e);
-                result.addError("Row = " + rowIndex + " , " + e.getMessage());
+            } catch (RuntimeException re) {
+                logger.error("row = " + rowIndex, re);
+                result.addError("Row = " + rowIndex + " , " + re.getMessage());
             }
         }
         return result;
@@ -149,7 +151,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
             	String message = parseStatus(e.getMessage());
             	Row row = savingsSheet.getRow(saving.getRowIndex());
             	Cell statusCell = row.createCell(STATUS_COL);
-            	statusCell.setCellValue(message);
+            	statusCell.setCellValue("Failed");
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.RED));
                 Cell errorReportCell = row.createCell(FAILURE_REPORT_COL);
             	errorReportCell.setCellValue(message);

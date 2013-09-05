@@ -54,11 +54,11 @@ public class Loan {
 	
 	private final String repaymentsStartingFromDate;
 	
-	private final String dateFormat = "dd MMMM yyyy";
+	private final String dateFormat;
 	
-	private final Locale locale = Locale.ENGLISH;
+	private final Locale locale;
 	
-	private final String loanType = "individual";
+	private final String loanType;
 	
 	public Loan( String clientId, String productId, String loanOfficerId, String submittedOnDate, String fundId, String principal, String numberOfRepayments, String repaymentEvery,
 			String repaymentFrequencyType,  String loanTermFrequency, String loanTermFrequencyType, String interestRatePerPeriod, String expectedDisbursementDate, String amortizationType,
@@ -87,6 +87,9 @@ public class Loan {
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 		this.submittedOnDate = submittedOnDate;
 		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+		this.dateFormat = "dd MMMM yyyy";
+		this.locale = Locale.ENGLISH;
+		this.loanType = "individual";
 		this.rowIndex = rowIndex;
 		this.status = status;
 	}

@@ -6,9 +6,9 @@ public class CorporateClient {
 
 	 private final transient Integer rowIndex;
 	    
-	    private final String dateFormat="dd MMMM yyyy";
+	    private final String dateFormat;
 	    
-	    private final Locale locale = Locale.ENGLISH;
+	    private final Locale locale;
 	    
 	    private final String officeId;
 	    
@@ -34,6 +34,8 @@ public class CorporateClient {
 	        this.officeId = officeId;
 	        this.staffId = staffId;
 	        this.rowIndex = rowIndex;
+	        this.dateFormat = "dd MMMM yyyy";
+	        this.locale = Locale.ENGLISH;
 	    }
 	    
 	    public String getFullName() {

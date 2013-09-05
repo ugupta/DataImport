@@ -4,19 +4,22 @@ import java.util.Locale;
 
 public class LoanApproval {
 	
-	private final transient Integer rowIndex;
+	 private final transient Integer rowIndex;
 
-	private final String approvedOnDate;
+	 private final String approvedOnDate;
 	
-	private final String dateFormat="dd MMMM yyyy";
+	 private final String dateFormat;
 	
-	 private final Locale locale = Locale.ENGLISH;
+	 private final Locale locale;
 	 
-	 private final String note = "";
+	 private final String note;
 	 
 	 public LoanApproval(String approvedOnDate, Integer rowIndex ) {
 	        this.approvedOnDate = approvedOnDate;
 	        this.rowIndex = rowIndex;
+	        this.dateFormat = "dd MMMM yyyy";
+	        this.locale = Locale.ENGLISH;
+	        this.note = "";
 	    }
 	 
 	  public String getApprovedOnDate() {

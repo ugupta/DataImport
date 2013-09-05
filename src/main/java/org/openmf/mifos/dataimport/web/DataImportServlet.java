@@ -29,8 +29,6 @@ public class DataImportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(DataImportServlet.class);
-    
-    private Workbook workbook;
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,10 +39,10 @@ public class DataImportServlet extends HttpServlet {
             filename = readFileName(part);
             ImportFormatType type = ImportFormatType.of(part.getContentType());
             InputStream content = part.getInputStream();
-            workbook = new HSSFWorkbook(content);
+            Workbook workbook = new HSSFWorkbook(content);
             DataImportHandler handler = ImportHandlerFactory.createImportHandler(workbook, type);
             Result result = parseAndUpload(handler);
-            writeResult(result, response);
+            writeResult(workbook, result, response);
         } catch (IOException e) {
             throw new ServletException("Cannot import request. " + filename, e);
         }
@@ -69,7 +67,7 @@ public class DataImportServlet extends HttpServlet {
         return result;
     }
 
-    void writeResult(Result result, HttpServletResponse response) throws IOException {
+    void writeResult(Workbook workbook, Result result, HttpServletResponse response) throws IOException {
     	OutputStream stream = response.getOutputStream();
         OutputStreamWriter out = new OutputStreamWriter(stream,"UTF-8");
         if(result.isSuccess()) {

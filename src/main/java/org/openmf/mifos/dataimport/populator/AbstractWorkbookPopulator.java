@@ -1,15 +1,24 @@
 package org.openmf.mifos.dataimport.populator;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.dto.GeneralClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
+	
+	private static final Logger logger = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
 
 	    protected void writeInt(int colIndex, Row row, int value) {
 	            row.createCell(colIndex).setCellValue(value);
@@ -40,8 +49,22 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 	    	    Date dateWithoutTime = cal.getTime();
 	    	    row.createCell(colIndex).setCellValue(dateWithoutTime);
 	    	    row.getCell(colIndex).setCellStyle(dateCellStyle);
-	    	    } catch (Exception e) {
+	    	    } catch (ParseException pe) {
 	    	    	throw new IllegalArgumentException("ParseException");
-	    	    }
+	    	    } 
+	    }
+	    
+	    protected void setDateLookupTable(Sheet sheet, List<GeneralClient> clients, int clientNameCol, int activationDateCol) {
+	    	Workbook workbook = sheet.getWorkbook();
+	    	CellStyle dateCellStyle = workbook.createCellStyle();
+	        short df = workbook.createDataFormat().getFormat("dd/mm/yy");
+	        dateCellStyle.setDataFormat(df);	
+	    	int rowIndex = 0;
+    		for(GeneralClient client: clients) {
+    			Row row = sheet.getRow(++rowIndex);
+    			logger.info(client.getDisplayName().replaceAll("[ )(] ", "_"));
+    			writeString(clientNameCol, row, client.getDisplayName().replaceAll("[ )(] ", "_"));
+    			writeDate(activationDateCol, row, client.getActivationDate().get(2) + "/" + client.getActivationDate().get(1) + "/" + client.getActivationDate().get(0), dateCellStyle);
+    		}
 	    }
 }

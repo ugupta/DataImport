@@ -152,9 +152,9 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
 	            		writeDate(CLOSE_DATE_COL, row, "1/1/2040", dateCellStyle);
 	            	productSheet.protectSheet("");
 	            }
-	    	} catch (Exception e) {
-	    		result.addError(e.getMessage());
-	    		logger.error(e.getMessage());
+	    	} catch (RuntimeException re) {
+	    		result.addError(re.getMessage());
+	    		logger.error(re.getMessage());
 	    	}
 	        return result;
 	 }

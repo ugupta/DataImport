@@ -1,6 +1,7 @@
 package org.openmf.mifos.dataimport.dto;
 
 import java.util.Comparator;
+import java.util.Locale;
 
 public class CompactLoan {
 
@@ -42,12 +43,12 @@ public class CompactLoan {
 		return this.status.isActive();
 	}
 	
-	public static Comparator<CompactLoan> ClientNameComparator = new Comparator<CompactLoan>() {
+	public static final Comparator<CompactLoan> ClientNameComparator = new Comparator<CompactLoan>() {
 		
 	@Override
 	public int compare(CompactLoan loan1, CompactLoan loan2) {
-		String clientOfLoan1 = loan1.getClientName().toUpperCase();
-		String clientOfLoan2 = loan2.getClientName().toUpperCase(); 
+		String clientOfLoan1 = loan1.getClientName().toUpperCase(Locale.ENGLISH);
+		String clientOfLoan2 = loan2.getClientName().toUpperCase(Locale.ENGLISH); 
 		return clientOfLoan1.compareTo(clientOfLoan2);
 	 }
 	};

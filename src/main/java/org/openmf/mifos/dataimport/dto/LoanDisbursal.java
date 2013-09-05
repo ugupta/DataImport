@@ -10,26 +10,34 @@ public class LoanDisbursal {
 	
 	 private final String paymentTypeId;
 	
-	 private final String dateFormat="dd MMMM yyyy";
+	 private final String dateFormat;
 	
-	 private final Locale locale = Locale.ENGLISH;
+	 private final Locale locale;
 	 
-	 private final String note = "";
+	 private final String note;
 	 
-	 private final String accountNumber = "";
+	 private final String accountNumber;
 	 
-	 private final String routingCode = "";
+	 private final String routingCode;
 	 
-	 private final String receiptNumber = "";
+	 private final String receiptNumber;
 	 
-	 private final String bankNumber = "";
+	 private final String bankNumber;
 	 
-	 private final String checkNumber = "";
+	 private final String checkNumber;
 	 
 	 public LoanDisbursal(String actualDisbursementDate, String paymentTypeId, Integer rowIndex) {
 	        this.actualDisbursementDate = actualDisbursementDate;
 	        this.paymentTypeId = paymentTypeId;
 	        this.rowIndex = rowIndex;
+	        this.dateFormat = "dd MMMM yyyy";
+	        this.locale = Locale.ENGLISH;
+	        this.note = "";
+	        this.accountNumber = "";
+	        this.routingCode = "";
+	        this.receiptNumber = "";
+	        this.bankNumber = "";
+	        this.checkNumber = "";
 	    }
 	 
 	 public String getActualDisbursementDate() {
@@ -57,22 +65,22 @@ public class LoanDisbursal {
 	    }
 	    
 	    public String getAccountNumber() {
-	    	return this.accountNumber;
+	    	return accountNumber;
 	    }
 	    
 	    public String getRoutingCode() {
-	    	return this.routingCode;
+	    	return routingCode;
 	    }
 	    
 	    public String getReceiptNumber() {
-	    	return this.receiptNumber;
+	    	return receiptNumber;
 	    }
 	    
 	    public String getBankNumber() {
-	    	return this.bankNumber;
+	    	return bankNumber;
 	    }
 	    
 	    public String getCheckNumber() {
-	    	return this.checkNumber;
+	    	return checkNumber;
 	    }
 }

@@ -22,7 +22,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         Integer noOfEntries = 1;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
         // sometimes
-           while (sheet.getRow(noOfEntries).getCell(primaryColumn) != null) {
+           while (sheet.getRow(noOfEntries) !=null && sheet.getRow(noOfEntries).getCell(primaryColumn) != null) {
                noOfEntries++;
            }
         	
@@ -35,7 +35,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         	if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
         		return "";
         	return ((Double) c.getNumericCellValue()).intValue() + "";
-        } catch (Exception e) {
+        } catch (RuntimeException re) {
             return row.getCell(colIndex).getStringCellValue();
         }
     }
@@ -95,7 +95,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
     
     protected String parseStatus(String errorMessage) {
-    	String message = "";
+    	StringBuffer message = new StringBuffer();
     	JsonObject obj = new JsonParser().parse(errorMessage.trim()).getAsJsonObject();
         JsonArray array = obj.getAsJsonArray("errors");
         Iterator<JsonElement> iterator = array.iterator();
@@ -103,9 +103,9 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         	JsonObject json = iterator.next().getAsJsonObject();
         	String parameterName = json.get("parameterName").toString();
         	String defaultUserMessage = json.get("defaultUserMessage").toString();
-        	message += parameterName.substring(1, parameterName.length() - 1) + ":" + defaultUserMessage.substring(1, defaultUserMessage.length() - 1) + "\t";
+        	message = message.append(parameterName.substring(1, parameterName.length() - 1) + ":" + defaultUserMessage.substring(1, defaultUserMessage.length() - 1) + "\t");
          }
-    	 return message;
+    	 return message.toString();
     }
     
     public Integer getIdByName (Sheet sheet, String name) {
@@ -113,8 +113,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     	if(sheetName.equals("Offices") || sheetName.equals("Clients") || sheetName.equals("Staff") || sheetName.equals("Extras")) {
     	for (Row row : sheet) {
             for (Cell cell : row) {
-                if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
-                    if (cell.getRichStringCellValue().getString().trim().equals(name)) {
+                if (cell.getCellType() == Cell.CELL_TYPE_STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
                     	if(sheet.getSheetName().equals("Offices"))
                             return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue(); 
                     	else if(sheet.getSheetName().equals("Staff") || sheet.getSheetName().equals("Clients"))
@@ -122,17 +121,14 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
                     	else if(sheet.getSheetName().equals("Extras"))
                     		return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();
                     }
-                }
             }
           }
     	} else if (sheetName.equals("Products")) {
     		for(Row row : sheet) {
     			for(int i = 0; i < 2; i++) {
     				Cell cell = row.getCell(i);
-    				if(cell.getCellType() == Cell.CELL_TYPE_STRING) {
-    					if(cell.getRichStringCellValue().getString().trim().equals(name)) {
+    				if(cell.getCellType() == Cell.CELL_TYPE_STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
     						return ((Double)row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).intValue();
-    					}
     				}
     			}
     		}

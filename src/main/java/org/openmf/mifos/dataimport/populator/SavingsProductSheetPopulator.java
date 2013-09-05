@@ -90,19 +90,25 @@ private static final Logger logger = LoggerFactory.getLogger(SavingsProductSheet
 	            	writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
 	            	writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
 	            	writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
-	            	writeDouble(MIN_OPENING_BALANCE_COL, row, product.getMinRequiredOpeningBalance());
-	            	writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
-	            	writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
-	            	writeDouble(WITHDRAWAL_FEE_AMOUNT_COL, row, product.getWithdrawalFeeAmount());
-	            	writeString(WITHDRAWAL_FEE_TYPE_COL, row, product.getWithdrawalFeeType().getValue());
-	            	writeDouble(ANNUAL_FEE_COL, row, product.getAnnualFeeAmount());
-	            	writeDate(ANNUAL_FEE_ON_MONTH_DAY_COL, row, product.getAnnualFeeOnMonthDay().get(1) + "/" + product.getAnnualFeeOnMonthDay().get(0) + "/2010" , dateCellStyle);
+	            	if(product.getMinRequiredOpeningBalance() != null)
+	            	    writeDouble(MIN_OPENING_BALANCE_COL, row, product.getMinRequiredOpeningBalance());
+	            	if(product.getLockinPeriodFrequency() != null)
+	            	    writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
+	            	if(product.getLockinPeriodFrequencyType() != null)
+	            	    writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
+	            	if(product.getWithdrawalFeeAmount() != null)
+	            	    writeDouble(WITHDRAWAL_FEE_AMOUNT_COL, row, product.getWithdrawalFeeAmount());
+	            	if(product.getWithdrawalFeeType() != null)
+	            	    writeString(WITHDRAWAL_FEE_TYPE_COL, row, product.getWithdrawalFeeType().getValue());
+	            	if(product.getAnnualFeeAmount() != null)
+	            	    writeDouble(ANNUAL_FEE_COL, row, product.getAnnualFeeAmount());
+	            	if(product.getAnnualFeeOnMonthDay() != null)
+	            	    writeDate(ANNUAL_FEE_ON_MONTH_DAY_COL, row, product.getAnnualFeeOnMonthDay().get(1) + "/" + product.getAnnualFeeOnMonthDay().get(0) + "/2010" , dateCellStyle);
 	            }
-	            
 	        	productSheet.protectSheet("");
-    	} catch (Exception e) {
-    		result.addError(e.getMessage());
-    		logger.error(e.getMessage());
+    	} catch (RuntimeException re) {
+    		result.addError(re.getMessage());
+    		logger.error(re.getMessage());
     	}
         return result;
       }

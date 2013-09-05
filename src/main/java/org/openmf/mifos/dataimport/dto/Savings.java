@@ -40,11 +40,11 @@ public class Savings {
 	
 	private final String annualFeeOnMonthDay;
 	
-	private final String monthDayFormat = "dd MMM";
+	private final String monthDayFormat;
 	
-    private final String dateFormat = "dd MMMM yyyy";
+    private final String dateFormat;
 	
-	private final Locale locale = Locale.ENGLISH;
+	private final Locale locale;
 	
 	public Savings( String clientId, String productId, String fieldOfficerId, String submittedOnDate, String nominalAnnualInterestRate, String interestCompoundingPeriodType,
 			String interestPostingPeriodType, String interestCalculationType, String interestCalculationDaysInYearType, String minRequiredOpeningBalance, String lockinPeriodFrequency,
@@ -67,6 +67,9 @@ public class Savings {
 		this.annualFeeOnMonthDay = annualFeeOnMonthDay;
 		this.rowIndex = rowIndex;
 		this.status = status;
+		this.dateFormat = "dd MMMM yyyy";
+		this.locale = Locale.ENGLISH;
+		this.monthDayFormat =  "dd MMM";
 	}
 	
 	public String getClientId() {

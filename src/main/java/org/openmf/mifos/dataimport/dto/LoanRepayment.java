@@ -14,11 +14,11 @@ public class LoanRepayment {
 	
 	 private final String paymentTypeId;
 	
-	 private final String dateFormat="dd MMMM yyyy";
+	 private final String dateFormat;
 	
-	 private final Locale locale = Locale.ENGLISH;
+	 private final Locale locale;
 	 
-	 private final String note = "";
+	 private final String note;
 	 
 	 private final String accountNumber;
 	 
@@ -42,6 +42,9 @@ public class LoanRepayment {
 	        this.bankNumber = bankNumber;
 	        this.loanAccountId = loanAccountId;
 	        this.rowIndex = rowIndex;
+	        this.dateFormat = "dd MMMM yyyy";
+	        this.locale = Locale.ENGLISH;
+	        this.note = "";
 	    }
 	 
 	    public LoanRepayment(String transactionAmount, String transactionDate, String paymentTypeId, Integer rowIndex) {

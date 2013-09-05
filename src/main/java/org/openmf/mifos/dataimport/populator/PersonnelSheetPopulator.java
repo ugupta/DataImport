@@ -83,9 +83,9 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	            	idToName.put(office.getId(), office.getName());
 	            	offices.add(office);
 	            }
-	        } catch (Exception e) {
-	            result.addError(e.getMessage());
-	            logger.error(e.getMessage());
+	        } catch (RuntimeException re) {
+	            result.addError(re.getMessage());
+	            logger.error(re.getMessage());
 	        }
 	        return result;
 	    }
@@ -124,9 +124,9 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	        	rowIndex++;
 	        }
 	        staffSheet.protectSheet("");
-	    	} catch (Exception e) {
-	    		result.addError(e.getMessage());
-	    		logger.error(e.getMessage());
+	    	} catch (RuntimeException re) {
+	    		result.addError(re.getMessage());
+	    		logger.error(re.getMessage());
 	    	}
 	        return result;
 	    }
