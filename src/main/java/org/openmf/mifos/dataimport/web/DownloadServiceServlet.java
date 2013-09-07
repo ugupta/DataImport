@@ -27,14 +27,14 @@ public class DownloadServiceServlet extends HttpServlet {
 		String fileName = request.getParameter("template");
 		
 		try{
-		String parameter = null;
-		if(request.getParameter("template").equals("client"))
-		    parameter = request.getParameter("clientType");
-		WorkbookPopulator populator = WorkbookPopulatorFactory.createWorkbookPopulator(parameter, fileName);
-		Workbook workbook = new HSSFWorkbook();
-        Result result = downloadAndPopulate(workbook, populator);
-		fileName=fileName+".xls";
-		writeToStream(workbook, result, response, fileName);
+			String parameter = null;
+			if(request.getParameter("template").equals("client"))
+			    parameter = request.getParameter("clientType");
+			WorkbookPopulator populator = WorkbookPopulatorFactory.createWorkbookPopulator(parameter, fileName);
+			Workbook workbook = new HSSFWorkbook();
+	        Result result = downloadAndPopulate(workbook, populator);
+			fileName=fileName+".xls";
+			writeToStream(workbook, result, response, fileName);
 		}catch(Exception e){
 			throw new ServletException("Cannot download template - " + fileName, e);
 		}

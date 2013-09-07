@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmf.mifos.dataimport.dto.Client;
 import org.openmf.mifos.dataimport.dto.CorporateClient;
-import org.openmf.mifos.dataimport.handler.ClientDataImportHandler;
 import org.openmf.mifos.dataimport.handler.Result;
+import org.openmf.mifos.dataimport.handler.client.ClientDataImportHandler;
 import org.openmf.mifos.dataimport.http.RestClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,8 +47,8 @@ public class ClientImportHandlerTest {
         ClientDataImportHandler handler = new ClientDataImportHandler(book, restClient);
         Result result = handler.parse();
         Assert.assertTrue(result.isSuccess());
-        Assert.assertEquals(1, handler.getCorporateClients().size());
-        CorporateClient client = handler.getCorporateClients().get(0);
+        Assert.assertEquals(1, handler.getClients().size());
+        CorporateClient client = (CorporateClient) handler.getClients().get(0);
         Assert.assertEquals("Remo Fernandez", client.getFullName());
         Assert.assertEquals(handler.getIdByName(book.getSheet("Offices"), "Branch_7").toString(), client.getOfficeId());
         Assert.assertEquals(handler.getIdByName(book.getSheet("Staff"), "Tomas Rosicky").toString(), client.getStaffId());
