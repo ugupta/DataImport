@@ -63,7 +63,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
             return dateFormat.format(c.getDateCellValue());
     	}  catch  (Exception e) {
-    		return e.getMessage();
+    		return "";
     	}
     }
     
@@ -75,7 +75,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     		DateFormat dateFormat = new SimpleDateFormat("dd MMMM");
             return dateFormat.format(c.getDateCellValue());
     	}  catch  (Exception e) {
-    		return e.getMessage();
+    		return "";
     	}
     }
     

@@ -12,6 +12,9 @@ public class SavingsProduct {
 	@SerializedName("name")
     private final String name;
 	
+	@SerializedName("currency")
+	private final Currency currency;
+	
 	@SerializedName("nominalAnnualInterestRate")
     private final Double nominalAnnualInterestRate;
 	
@@ -48,11 +51,12 @@ public class SavingsProduct {
 	@SerializedName("annualFeeOnMonthDay")
     private final ArrayList<Integer> annualFeeOnMonthDay;
 	
-	public SavingsProduct(Integer id, String name, Double nominalAnnualInterestRate, Type interestCompoundingPeriodType, Type interestPostingPeriodType, Type interestCalculationType, 
+	public SavingsProduct(Integer id, String name, Currency currency, Double nominalAnnualInterestRate, Type interestCompoundingPeriodType, Type interestPostingPeriodType, Type interestCalculationType, 
 			Type interestCalculationDaysInYearType, Double minRequiredOpeningBalance, Integer lockinPeriodFrequency, Type lockinPeriodFrequencyType, Double withdrawalFeeAmount,
 			Type withdrawalFeeType, Double annualFeeAmount, ArrayList<Integer> annualFeeOnMonthDay) {
 		this.id = id;
 		this.name = name;
+		this.currency = currency;
 		this.nominalAnnualInterestRate = nominalAnnualInterestRate;
 		this.interestCompoundingPeriodType = interestCompoundingPeriodType;
 		this.interestPostingPeriodType = interestPostingPeriodType;
@@ -75,7 +79,11 @@ public class SavingsProduct {
         return this.name;
     }
     
-    public Double getNominalAnnualInterestRat() {
+    public Currency getCurrency() {
+    	return this.currency;
+    }
+    
+    public Double getNominalAnnualInterestRate() {
     	return this.nominalAnnualInterestRate;
     }
     

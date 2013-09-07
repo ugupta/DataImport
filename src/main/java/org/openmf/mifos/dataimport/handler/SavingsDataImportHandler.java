@@ -8,38 +8,43 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.Savings;
+import org.openmf.mifos.dataimport.dto.SavingsActivation;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class SavingsDataImportHandler extends AbstractDataImportHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SavingsDataImportHandler.class);
 	
 	@SuppressWarnings("CPD-START")
-	private static final int CLIENT_NAME_COL = 1;
+	 private static final int CLIENT_NAME_COL = 1;
     private static final int PRODUCT_COL = 2;
     private static final int FIELD_OFFICER_NAME_COL = 3;
     private static final int SUBMITTED_ON_DATE_COL = 4;
-//    private static final int APPROVED_DATE_COL = 5;
-//    private static final int ACTIVATION_DATE_COL = 6;
-    private static final int NOMINAL_ANNUAL_INTEREST_RATE_COL = 7; 
-	private static final int INTEREST_COMPOUNDING_PERIOD_COL = 8;
-	private static final int INTEREST_POSTING_PERIOD_COL = 9;
-	private static final int INTEREST_CALCULATION_COL = 10;
-	private static final int INTEREST_CALCULATION_DAYS_IN_YEAR_COL = 11;
-	private static final int MIN_OPENING_BALANCE_COL = 12;
-	private static final int LOCKIN_PERIOD_COL = 13;
-	private static final int LOCKIN_PERIOD_FREQUENCY_COL = 14;
-	private static final int WITHDRAWAL_FEE_AMOUNT_COL = 15;
-	private static final int WITHDRAWAL_FEE_TYPE_COL = 16;
-	private static final int ANNUAL_FEE_COL = 17;
-	private static final int ANNUAL_FEE_ON_MONTH_DAY_COL = 18;
-	private static final int STATUS_COL = 19;
-    private static final int FAILURE_REPORT_COL = 20;
+    private static final int APPROVED_DATE_COL = 5;  
+    private static final int ACTIVATION_DATE_COL = 6;
+    private static final int NOMINAL_ANNUAL_INTEREST_RATE_COL = 10;
+	private static final int INTEREST_COMPOUNDING_PERIOD_COL = 11;
+	private static final int INTEREST_POSTING_PERIOD_COL = 12;
+	private static final int INTEREST_CALCULATION_COL = 13;
+	private static final int INTEREST_CALCULATION_DAYS_IN_YEAR_COL = 14;
+	private static final int MIN_OPENING_BALANCE_COL = 15;
+	private static final int LOCKIN_PERIOD_COL = 16;
+	private static final int LOCKIN_PERIOD_FREQUENCY_COL = 17;
+	private static final int WITHDRAWAL_FEE_AMOUNT_COL = 18;
+	private static final int WITHDRAWAL_FEE_TYPE_COL = 19;
+	private static final int ANNUAL_FEE_COL = 20;
+	private static final int ANNUAL_FEE_ON_MONTH_DAY_COL = 21;
+	private static final int STATUS_COL = 22;
+	private static final int SAVINGS_ID_COL = 23;
+    private static final int FAILURE_REPORT_COL = 24;
     @SuppressWarnings("CPD-END")
 
     private final RestClient restClient;
@@ -47,6 +52,8 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
     private final Workbook workbook;
     
     private List<Savings> savings = new ArrayList<Savings>();
+    private List<Approval> approvalDates = new ArrayList<Approval>();
+    private List<SavingsActivation> activationDates = new ArrayList<SavingsActivation>();
 
     public SavingsDataImportHandler(Workbook workbook, RestClient client) {
         this.workbook = workbook;
@@ -72,8 +79,8 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 String fieldOfficerName = readAsString(FIELD_OFFICER_NAME_COL, row);
                 String fieldOfficerId = getIdByName(workbook.getSheet("Staff"), fieldOfficerName).toString();
                 String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
-//                String approvalDate = readAsDate(APPROVED_DATE_COL, row);
-//                String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
+                String approvalDate = readAsDate(APPROVED_DATE_COL, row);
+                String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
                 String nominalAnnualInterestRate = readAsString(NOMINAL_ANNUAL_INTEREST_RATE_COL, row);
                 String interestCompoundingPeriodType = readAsString(INTEREST_COMPOUNDING_PERIOD_COL, row);
                 String interestCompoundingPeriodTypeId = "";
@@ -102,7 +109,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 else if(interestCalculationDaysInYearType.equals("365 Days"))
                 	interestCalculationDaysInYearTypeId = "365";
                 String minRequiredOpeningBalance = readAsString(MIN_OPENING_BALANCE_COL, row);
-                String lockinPeriodFrequency = (lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row)).equals("0") ? "" : lockinPeriodFrequency;
+                String lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row);
                 String lockinPeriodFrequencyType = readAsString(LOCKIN_PERIOD_FREQUENCY_COL, row);
                 String lockinPeriodFrequencyTypeId = "";
                 if(lockinPeriodFrequencyType.equals("Days"))
@@ -113,18 +120,26 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                 	lockinPeriodFrequencyTypeId = "2";
                 else if(lockinPeriodFrequencyType.equals("Years"))
                 	lockinPeriodFrequencyTypeId = "3";
-                String withdrawalFeeAmount = (withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row)).equals("0") ? "" : withdrawalFeeAmount;
+                String withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row);
                 String withdrawalFeeType = readAsString(WITHDRAWAL_FEE_TYPE_COL, row);
                 String withdrawalFeeTypeId = "";
                 if(withdrawalFeeType.equals("Flat"))
                 	withdrawalFeeTypeId = "1";
                 else if(withdrawalFeeType.equals("% of Amount"))
                 	withdrawalFeeTypeId = "2";
-                String annualFeeAmount = (annualFeeAmount = readAsString(ANNUAL_FEE_COL, row)).equals("0") ? "" : annualFeeAmount;
-                String annualFeeOnMonthDay = (annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row)).equals("31 December") ? "" : annualFeeOnMonthDay;
+                String annualFeeAmount = readAsString(ANNUAL_FEE_COL, row);
+                String annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row);
                 savings.add(new Savings(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
                 		interestCalculationTypeId, interestCalculationDaysInYearTypeId, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeId, withdrawalFeeAmount,
                 		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, rowIndex, status));
+                if(!approvalDate.equals(""))
+                    approvalDates.add(new Approval(approvalDate, rowIndex));
+                 else
+                    approvalDates.add(rowIndex - 1, null);	
+                 if(!activationDate.equals(""))
+                    activationDates.add(new SavingsActivation(activationDate, rowIndex));
+                 else
+                    activationDates.add(rowIndex - 1, null);
             } catch (RuntimeException re) {
                 logger.error("row = " + rowIndex, re);
                 result.addError("Row = " + rowIndex + " , " + re.getMessage());
@@ -138,28 +153,76 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet savingsSheet = workbook.getSheet("Savings");
         restClient.createAuthToken();
-        for (Savings saving : savings) {
+        int progressLevel = 0;
+        String savingsId = "";
+        for (int i = 0; i < savings.size(); i++) {
             try {
+            	progressLevel = 0;
                 Gson gson = new Gson();
-                String payload = gson.toJson(saving);
-                logger.info(payload);
-                restClient.post("savingsaccounts", payload);
-                Cell statusCell = savingsSheet.getRow(saving.getRowIndex()).createCell(STATUS_COL);
+                String payload ="", response = "";
+                String status = savings.get(i).getStatus();
+
+                if(status.equals("Creation failed.") || status.equals(""))
+                {
+                  payload = gson.toJson(savings.get(i));
+                  logger.info(payload);
+                  response = restClient.post("savingsaccounts", payload);
+                  logger.info(response);
+                  progressLevel = 1;
+                
+                  JsonParser parser = new JsonParser();
+                  JsonObject obj = parser.parse(response).getAsJsonObject();
+                  savingsId = obj.get("savingsId").getAsString();
+                } else {
+                	savingsId = readAsInt(SAVINGS_ID_COL, savingsSheet.getRow(savings.get(i).getRowIndex()));
+                }
+                
+                if(status.equals("Approval failed.") || status.equals("Creation failed.") || status.equals(""))
+                {
+                  if(approvalDates.get(i) != null) {
+                     payload = gson.toJson(approvalDates.get(i));
+                     logger.info(payload);
+                     restClient.post("savingsaccounts/" + savingsId + "?command=approve", payload);
+                  }
+                  progressLevel = 2;
+                }  
+                
+                if((status.equals("Activation failed.") || status.equals("Approval failed.") || status.equals("Creation failed.") || status.equals("")) && approvalDates.get(i) != null && activationDates.get(i) != null)
+                {
+                  payload = gson.toJson(activationDates.get(i));
+                  logger.info(payload);
+                  restClient.post("savingsaccounts/" + savingsId + "?command=activate", payload);
+                }
+                
+                Cell statusCell = savingsSheet.getRow(savings.get(i).getRowIndex()).createCell(STATUS_COL);
                 statusCell.setCellValue("Imported");
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
+            	logger.info(e.getMessage());
             	String message = parseStatus(e.getMessage());
-            	Row row = savingsSheet.getRow(saving.getRowIndex());
+            	String status = "";
+            	Row row = savingsSheet.getRow(savings.get(i).getRowIndex());
             	Cell statusCell = row.createCell(STATUS_COL);
-            	statusCell.setCellValue("Failed");
+            	if(progressLevel == 0)
+            		status = "Creation";
+            	else if(progressLevel == 1)
+            		status = "Approval";
+            	else if(progressLevel == 2)
+            		status = "Activation";
+                statusCell.setCellValue(status + " failed.");
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.RED));
+                if(progressLevel>0)
+                	row.createCell(SAVINGS_ID_COL).setCellValue(savingsId);
                 Cell errorReportCell = row.createCell(FAILURE_REPORT_COL);
             	errorReportCell.setCellValue(message);
-                result.addError("Row = " + saving.getRowIndex() + " ," + message);
+                result.addError("Row = " + savings.get(i).getRowIndex() + " ," + message);
             }
         }
         savingsSheet.setColumnWidth(STATUS_COL, 4000);
-    	writeString(STATUS_COL, savingsSheet.getRow(0), "Status");
+        Row rowHeader = savingsSheet.getRow(0);
+    	writeString(STATUS_COL, rowHeader, "Status");
+    	writeString(SAVINGS_ID_COL, rowHeader, "Loan ID");
+    	writeString(FAILURE_REPORT_COL, rowHeader, "Report");
         return result;
     }
     

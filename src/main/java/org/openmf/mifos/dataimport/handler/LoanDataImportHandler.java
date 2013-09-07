@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Loan;
-import org.openmf.mifos.dataimport.dto.LoanApproval;
+import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.LoanDisbursal;
 import org.openmf.mifos.dataimport.dto.LoanRepayment;
 import org.openmf.mifos.dataimport.http.RestClient;
@@ -59,7 +59,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     @SuppressWarnings("CPD-END")
     
     private List<Loan> loans = new ArrayList<Loan>();
-    private List<LoanApproval> approvalDates = new ArrayList<LoanApproval>();
+    private List<Approval> approvalDates = new ArrayList<Approval>();
     private List<LoanDisbursal> disbursalDates = new ArrayList<LoanDisbursal>();
     private List<LoanRepayment> loanRepayments = new ArrayList<LoanRepayment>();
     
@@ -170,7 +170,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
                 		loanTermFrequencyId, nominalInterestRate, submittedOnDate, amortizationId, interestMethodId, interestCalculationPeriodId, arrearsTolerance, repaymentStrategyId,
                 		graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, rowIndex, status));
                 if(!approvedDate.equals(""))
-                   approvalDates.add(new LoanApproval(approvedDate, rowIndex));
+                   approvalDates.add(new Approval(approvedDate, rowIndex));
                 else
                    approvalDates.add(rowIndex - 1, null);	
                 if(!disbursedDate.equals(""))

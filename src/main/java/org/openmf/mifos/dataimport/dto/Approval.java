@@ -2,7 +2,7 @@ package org.openmf.mifos.dataimport.dto;
 
 import java.util.Locale;
 
-public class LoanApproval {
+public class Approval {
 	
 	 private final transient Integer rowIndex;
 
@@ -14,7 +14,7 @@ public class LoanApproval {
 	 
 	 private final String note;
 	 
-	 public LoanApproval(String approvedOnDate, Integer rowIndex ) {
+	 public Approval(String approvedOnDate, Integer rowIndex ) {
 	        this.approvedOnDate = approvedOnDate;
 	        this.rowIndex = rowIndex;
 	        this.dateFormat = "dd MMMM yyyy";
