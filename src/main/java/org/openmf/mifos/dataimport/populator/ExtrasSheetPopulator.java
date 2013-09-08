@@ -122,4 +122,12 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     public Integer getPaymentTypesSize() {
     	return paymentTypes.size();
     }
+    
+    public List<Fund> getFunds() {
+    	return funds;
+    }
+    
+	public List<PaymentType> getPaymentTypes() {
+		return paymentTypes;
+	}
 }

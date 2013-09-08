@@ -30,12 +30,12 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
 
     private String content;
     
-    private List<GeneralClient> clients = new ArrayList<GeneralClient>();
+    private List<GeneralClient> clients;
     private ArrayList<String> officeNames;
     
     private Map<String, ArrayList<String>> officeToClients;
     private Map<Integer, Integer> lastColumnLetters;
-    private Map<String, Integer> nameToId;
+    private Map<String, Integer> clientNameToClientId;
     
     private static final int OFFICE_NAME_COL = 0;
     private static final int CLIENT_NAME_COL = 1;
@@ -50,19 +50,20 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     	Result result = new Result();
     	try {
         	restClient.createAuthToken();
+        	clients = new ArrayList<GeneralClient>();
             content = restClient.get("clients");
             Gson gson = new Gson();
             JsonParser parser = new JsonParser();
             JsonObject obj = parser.parse(content).getAsJsonObject();
             JsonArray array = obj.getAsJsonArray("pageItems");
             Iterator<JsonElement> iterator = array.iterator();
-            nameToId = new HashMap<String, Integer>();
+            clientNameToClientId = new HashMap<String, Integer>();
             while(iterator.hasNext()) {
             	JsonElement json = iterator.next();
             	GeneralClient client = gson.fromJson(json, GeneralClient.class);
             	if(client.isActive())
             	  clients.add(client);
-            	nameToId.put(client.getDisplayName(), client.getId());
+            	clientNameToClientId.put(client.getDisplayName(), client.getId());
             }
             content = restClient.get("offices");
             JsonElement json2 = parser.parse(content);
@@ -109,7 +110,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
 	        	if(!clientList.isEmpty()) {
 	        	  colIndex = 0;	
 	        	  for(String clientName: clientList) 
-	        	     writeInt(++colIndex, row, nameToId.get(clientName));
+	        	     writeInt(++colIndex, row, clientNameToClientId.get(clientName));
 	        	}
 	        	
 	        	lastColumnLetters.put(officeIndex++, colIndex);
@@ -155,6 +156,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     public List<GeneralClient> getClients() {
         return clients;
     }
+    
 
     public Integer getClientsSize() {
     	return clients.size();
@@ -166,5 +168,12 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     
     public Map<Integer, Integer> getLastColumnLetters() {
     	return lastColumnLetters;
+    }
+    
+    public Map<String, ArrayList<String>> getOfficeToClients() {
+    	return officeToClients;
+    }
+    public Map<String, Integer> getClientNameToClientId() {
+    	return clientNameToClientId;
     }
 }

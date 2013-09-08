@@ -30,15 +30,15 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private String content;
 	
-	private List<Personnel> personnel = new ArrayList<Personnel>();
+	private List<Personnel> personnel;
 	private List<Office> offices;
 	
 	//Maintaining the one to many relationship
 	private Map<String, ArrayList<String>> officeToPersonnel;
-	private Map<String, Integer> nameToId;
+	private Map<String, Integer> staffNameToStaffId;
 	
 	private Map<Integer, Integer> lastColumnLetters;
-	private Map<Integer,String> idToName;
+	private Map<Integer,String> officeIdToOfficeName;
 	
 	private static final int OFFICE_NAME_COL = 0;
 	private static final int STAFF_LIST_START_COL = 1;
@@ -54,12 +54,13 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	        Result result = new Result();
 	        try {
 	        	client.createAuthToken();
+	        	personnel = new ArrayList<Personnel>();
 	            content = client.get("staff");
 	            Gson gson = new Gson();
 	            JsonElement json = new JsonParser().parse(content);
 	            JsonArray array = json.getAsJsonArray();
 	            Iterator<JsonElement> iterator = array.iterator();
-	            nameToId = new HashMap<String, Integer>();
+	            staffNameToStaffId = new HashMap<String, Integer>();
 	            while(iterator.hasNext()) {
 	            	json = iterator.next();
 	            	Personnel person = gson.fromJson(json, Personnel.class);
@@ -69,18 +70,18 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	            	   if(person.isLoanOfficer())
 	            		   personnel.add(person);
 	            	}
-	            	nameToId.put(person.getFirstName() + " " +person.getLastName(), person.getId());
+	            	staffNameToStaffId.put(person.getFirstName() + " " +person.getLastName(), person.getId());
 	            }
 	            offices = new ArrayList<Office>();
 	            content = client.get("offices");
 	            json = new JsonParser().parse(content);
 	            array = json.getAsJsonArray();
 	            iterator = array.iterator();
-	            idToName = new HashMap<Integer,String>();
+	            officeIdToOfficeName = new HashMap<Integer,String>();
 	            while(iterator.hasNext()) {
 	            	json = iterator.next();
 	            	Office office = gson.fromJson(json, Office.class);
-	            	idToName.put(office.getId(), office.getName());
+	            	officeIdToOfficeName.put(office.getId(), office.getName());
 	            	offices.add(office);
 	            }
 	        } catch (RuntimeException re) {
@@ -111,7 +112,7 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	        	ArrayList<Integer> staffIdList = new ArrayList<Integer> ();
 	        	if(!fullStaffList.isEmpty())
 	        		for(String staffName : fullStaffList) {
-	        			staffIdList.add(nameToId.get(staffName));
+	        			staffIdList.add(staffNameToStaffId.get(staffName));
 	        			colIndex++;
 	        		    writeString(colIndex, row, staffName);
 	        		}
@@ -165,7 +166,7 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	    }
 	    
 	    private String getOfficeNameFromOfficeId(Integer officeId) {
-	    	return idToName.get(officeId);
+	    	return officeIdToOfficeName.get(officeId);
 	    }
 	    
 	    
@@ -183,8 +184,8 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	        return personnel;
 	    }
 	    
-	    public Integer getPersonnelSize() {
-	    	return personnel.size();
+	    public List<Office> getOffices() {
+	    	return offices;
 	    }
 	    
 	    public Map<String, ArrayList<String>> getOfficeToPersonnel() {
@@ -193,5 +194,13 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 	    
 	    public Map<Integer, Integer> getLastColumnLetters() {
 	    	return lastColumnLetters;
+	    }
+	    
+	    public Map<Integer,String> getOfficeIdToOfficeName() {
+	    	return officeIdToOfficeName;
+	    }
+	    
+	    public Map<String, Integer> getStaffNameToStaffId() {
+	    	return staffNameToStaffId;
 	    }
 }

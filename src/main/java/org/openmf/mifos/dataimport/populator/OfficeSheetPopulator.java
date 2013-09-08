@@ -1,10 +1,8 @@
 package org.openmf.mifos.dataimport.populator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -31,8 +29,6 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
 	
 	private List<Office> offices;
 	
-	private Map<Integer,String> idToName;
-	
 	private static final int ID_COL = 0;
 	private static final int OFFICE_NAME_COL = 1;
 	private static final int EXTERNAL_ID_COL = 2;
@@ -52,17 +48,13 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         	offices = new ArrayList<Office>();
             content = client.get("offices");
             Gson gson = new Gson();
-//            logger.info(content);
             JsonElement json = new JsonParser().parse(content);
             JsonArray array = json.getAsJsonArray();
             Iterator<JsonElement> iterator = array.iterator();
-            idToName = new HashMap<Integer,String>();
             while(iterator.hasNext()) {
             	json = iterator.next();
             	Office office = gson.fromJson(json, Office.class);
-            	idToName.put(office.getId(), office.getName());
             	offices.add(office);
-            	logger.info("CHECK : "+office.toString());
             }
         } catch (Exception e) {
             result.addError(e.getMessage());
