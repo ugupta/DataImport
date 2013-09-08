@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.handler.client.ClientDataImportHandler;
+import org.openmf.mifos.dataimport.handler.loan.LoanDataImportHandler;
+import org.openmf.mifos.dataimport.handler.loan.LoanRepaymentDataImportHandler;
+import org.openmf.mifos.dataimport.handler.savings.SavingsDataImportHandler;
 import org.openmf.mifos.dataimport.http.MifosRestClient;
 
 

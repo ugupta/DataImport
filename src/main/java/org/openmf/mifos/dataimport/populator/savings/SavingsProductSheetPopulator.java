@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport.populator;
+package org.openmf.mifos.dataimport.populator.savings;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,6 +12,7 @@ import org.openmf.mifos.dataimport.dto.Currency;
 import org.openmf.mifos.dataimport.dto.SavingsProduct;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
+import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

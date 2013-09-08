@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport.populator;
+package org.openmf.mifos.dataimport.populator.loan;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +21,10 @@ import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.LoanProduct;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
+import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
+import org.openmf.mifos.dataimport.populator.ClientSheetPopulator;
+import org.openmf.mifos.dataimport.populator.ExtrasSheetPopulator;
+import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
 
 public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	

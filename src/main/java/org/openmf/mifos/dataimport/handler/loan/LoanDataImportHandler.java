@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport.handler;
+package org.openmf.mifos.dataimport.handler.loan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,8 @@ import org.openmf.mifos.dataimport.dto.Loan;
 import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.LoanDisbursal;
 import org.openmf.mifos.dataimport.dto.LoanRepayment;
+import org.openmf.mifos.dataimport.handler.AbstractDataImportHandler;
+import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

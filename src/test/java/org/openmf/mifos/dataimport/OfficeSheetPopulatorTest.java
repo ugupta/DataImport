@@ -17,7 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmf.mifos.dataimport.dto.Office;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
-import org.openmf.mifos.dataimport.populator.OfficeSheetPopulator;
+import org.openmf.mifos.dataimport.populator.client.OfficeSheetPopulator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OfficeSheetPopulatorTest {

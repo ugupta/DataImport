@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport.handler;
+package org.openmf.mifos.dataimport.handler.savings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.Savings;
 import org.openmf.mifos.dataimport.dto.SavingsActivation;
+import org.openmf.mifos.dataimport.handler.AbstractDataImportHandler;
+import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,7 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmf.mifos.dataimport.dto.SavingsProduct;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
-import org.openmf.mifos.dataimport.populator.SavingsProductSheetPopulator;
+import org.openmf.mifos.dataimport.populator.savings.SavingsProductSheetPopulator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SavingsProductSheetPopulatorTest {

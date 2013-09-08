@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport.populator;
+package org.openmf.mifos.dataimport.populator.client;
 
 import java.util.List;
 
@@ -18,6 +18,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.Office;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
+import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
+import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
