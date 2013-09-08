@@ -25,6 +25,7 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
     private final Workbook workbook;
     
     private List<LoanRepayment> loanRepayments = new ArrayList<LoanRepayment>();
+    private String loanAccountId = "";
     
     private static final int LOAN_ACCOUNT_NO_COL = 2;
 	private static final int AMOUNT_COL = 5;
@@ -47,29 +48,12 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet loanRepaymentSheet = workbook.getSheet("LoanRepayment");
         Integer noOfEntries = getNumberOfRows(loanRepaymentSheet, 5);
-        logger.info("" + noOfEntries);
-        String loanAccountId = "";
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
                 row = loanRepaymentSheet.getRow(rowIndex);
-                String status = readAsString(STATUS_COL, row);
-                if(status.equals("Imported"))
-                	continue;
-                String loanAccountIdCheck = readAsInt(LOAN_ACCOUNT_NO_COL, row);
-                if(!loanAccountIdCheck.equals(""))
-                   loanAccountId = loanAccountIdCheck;
-                String repaymentAmount = readAsDouble(AMOUNT_COL, row).toString();
-                String repaymentDate = readAsDate(REPAID_ON_DATE_COL, row);
-                String repaymentType = readAsString(REPAYMENT_TYPE_COL, row);
-                String repaymentTypeId = getIdByName(workbook.getSheet("Extras"), repaymentType).toString();
-                String accountNumber = readAsInt(ACCOUNT_NO_COL, row);
-                String checkNumber = readAsInt(CHECK_NO_COL, row);
-                String routingCode = readAsInt(ROUTING_CODE_COL, row);
-                String receiptNumber = readAsInt(RECEIPT_NO_COL, row);
-                String bankNumber = readAsInt(BANK_NO_COL, row);
-                loanRepayments.add(new LoanRepayment(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
-                		checkNumber, routingCode, receiptNumber, bankNumber, Integer.parseInt(loanAccountId), rowIndex));
+                if(isNotImported(row, STATUS_COL))
+                    loanRepayments.add(parseAsLoanRepayment(row));
             } catch (Exception e) {
                 logger.error("row = " + rowIndex, e);
                 result.addError("Row = " + rowIndex + " , " + e.getMessage());
@@ -77,6 +61,23 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         }
         return result;
     }
+        
+        private LoanRepayment parseAsLoanRepayment(Row row) {
+        	 String loanAccountIdCheck = readAsInt(LOAN_ACCOUNT_NO_COL, row);
+             if(!loanAccountIdCheck.equals(""))
+                loanAccountId = loanAccountIdCheck;
+             String repaymentAmount = readAsDouble(AMOUNT_COL, row).toString();
+             String repaymentDate = readAsDate(REPAID_ON_DATE_COL, row);
+             String repaymentType = readAsString(REPAYMENT_TYPE_COL, row);
+             String repaymentTypeId = getIdByName(workbook.getSheet("Extras"), repaymentType).toString();
+             String accountNumber = readAsInt(ACCOUNT_NO_COL, row);
+             String checkNumber = readAsInt(CHECK_NO_COL, row);
+             String routingCode = readAsInt(ROUTING_CODE_COL, row);
+             String receiptNumber = readAsInt(RECEIPT_NO_COL, row);
+             String bankNumber = readAsInt(BANK_NO_COL, row);
+             return new LoanRepayment(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
+             		checkNumber, routingCode, receiptNumber, bankNumber, Integer.parseInt(loanAccountId), row.getRowNum());
+        }
     
     @Override
     public Result upload() {
@@ -105,5 +106,9 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         loanRepaymentSheet.setColumnWidth(STATUS_COL, 15000);
     	writeString(STATUS_COL, loanRepaymentSheet.getRow(0), "Status");
         return result;
+    }
+    
+    public List<LoanRepayment> getLoanRepayments() {
+    	return loanRepayments;
     }
 }

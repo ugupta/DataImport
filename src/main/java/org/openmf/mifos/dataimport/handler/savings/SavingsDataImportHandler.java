@@ -71,83 +71,93 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
             Row row;
             try {
                 row = savingsSheet.getRow(rowIndex);
-                String status = readAsString(STATUS_COL, row);
-                if(status.equals("Imported"))
-                	continue;
-                String clientName = readAsString(CLIENT_NAME_COL, row);
-                String clientId = getIdByName(workbook.getSheet("Clients"), clientName).toString();
-                String productName = readAsString(PRODUCT_COL, row);
-                String productId = getIdByName(workbook.getSheet("Products"), productName).toString();
-                String fieldOfficerName = readAsString(FIELD_OFFICER_NAME_COL, row);
-                String fieldOfficerId = getIdByName(workbook.getSheet("Staff"), fieldOfficerName).toString();
-                String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
-                String approvalDate = readAsDate(APPROVED_DATE_COL, row);
-                String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
-                String nominalAnnualInterestRate = readAsString(NOMINAL_ANNUAL_INTEREST_RATE_COL, row);
-                String interestCompoundingPeriodType = readAsString(INTEREST_COMPOUNDING_PERIOD_COL, row);
-                String interestCompoundingPeriodTypeId = "";
-                if(interestCompoundingPeriodType.equals("Daily"))
-                	interestCompoundingPeriodTypeId = "1";
-                else if(interestCompoundingPeriodType.equals("Monthly"))
-                	interestCompoundingPeriodTypeId = "4";
-                String interestPostingPeriodType = readAsString(INTEREST_POSTING_PERIOD_COL, row);
-                String interestPostingPeriodTypeId = "";
-                if(interestPostingPeriodType.equals("Monthly"))
-                	interestPostingPeriodTypeId = "4";
-                else if(interestPostingPeriodType.equals("Quarterly"))
-                	interestPostingPeriodTypeId = "5";
-                else if(interestPostingPeriodType.equals("Annually"))
-                	interestPostingPeriodTypeId = "7";
-                String interestCalculationType = readAsString(INTEREST_CALCULATION_COL, row);
-                String interestCalculationTypeId = "";
-                if(interestCalculationType.equals("Daily Balance"))
-                	interestCalculationTypeId = "1";
-                else if(interestCalculationType.equals("Average Daily Balance"))
-                	interestCalculationTypeId = "2";
-                String interestCalculationDaysInYearType = readAsString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row);
-                String interestCalculationDaysInYearTypeId = "";
-                if(interestCalculationDaysInYearType.equals("360 Days"))
-                	interestCalculationDaysInYearTypeId = "360";
-                else if(interestCalculationDaysInYearType.equals("365 Days"))
-                	interestCalculationDaysInYearTypeId = "365";
-                String minRequiredOpeningBalance = readAsString(MIN_OPENING_BALANCE_COL, row);
-                String lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row);
-                String lockinPeriodFrequencyType = readAsString(LOCKIN_PERIOD_FREQUENCY_COL, row);
-                String lockinPeriodFrequencyTypeId = "";
-                if(lockinPeriodFrequencyType.equals("Days"))
-                	lockinPeriodFrequencyTypeId = "0";
-                else if(lockinPeriodFrequencyType.equals("Weeks"))
-                	lockinPeriodFrequencyTypeId = "1";
-                else if(lockinPeriodFrequencyType.equals("Months"))
-                	lockinPeriodFrequencyTypeId = "2";
-                else if(lockinPeriodFrequencyType.equals("Years"))
-                	lockinPeriodFrequencyTypeId = "3";
-                String withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row);
-                String withdrawalFeeType = readAsString(WITHDRAWAL_FEE_TYPE_COL, row);
-                String withdrawalFeeTypeId = "";
-                if(withdrawalFeeType.equals("Flat"))
-                	withdrawalFeeTypeId = "1";
-                else if(withdrawalFeeType.equals("% of Amount"))
-                	withdrawalFeeTypeId = "2";
-                String annualFeeAmount = readAsString(ANNUAL_FEE_COL, row);
-                String annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row);
-                savings.add(new Savings(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
-                		interestCalculationTypeId, interestCalculationDaysInYearTypeId, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeId, withdrawalFeeAmount,
-                		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, rowIndex, status));
-                if(!approvalDate.equals(""))
-                    approvalDates.add(new Approval(approvalDate, rowIndex));
-                 else
-                    approvalDates.add(rowIndex - 1, null);	
-                 if(!activationDate.equals(""))
-                    activationDates.add(new SavingsActivation(activationDate, rowIndex));
-                 else
-                    activationDates.add(rowIndex - 1, null);
+                if(isNotImported(row, STATUS_COL)) {
+                    savings.add(parseAsSavings(row));
+                    approvalDates.add(parseAsSavingsApproval(row));
+                    activationDates.add(parseAsSavingsActivation(row));
+                }
             } catch (RuntimeException re) {
                 logger.error("row = " + rowIndex, re);
                 result.addError("Row = " + rowIndex + " , " + re.getMessage());
             }
         }
         return result;
+    }
+    
+    private Savings parseAsSavings(Row row) {
+    	String status = readAsString(STATUS_COL, row);
+    	String clientName = readAsString(CLIENT_NAME_COL, row);
+        String clientId = getIdByName(workbook.getSheet("Clients"), clientName).toString();
+        String productName = readAsString(PRODUCT_COL, row);
+        String productId = getIdByName(workbook.getSheet("Products"), productName).toString();
+        String fieldOfficerName = readAsString(FIELD_OFFICER_NAME_COL, row);
+        String fieldOfficerId = getIdByName(workbook.getSheet("Staff"), fieldOfficerName).toString();
+        String submittedOnDate = readAsDate(SUBMITTED_ON_DATE_COL, row);
+        String nominalAnnualInterestRate = readAsString(NOMINAL_ANNUAL_INTEREST_RATE_COL, row);
+        String interestCompoundingPeriodType = readAsString(INTEREST_COMPOUNDING_PERIOD_COL, row);
+        String interestCompoundingPeriodTypeId = "";
+        if(interestCompoundingPeriodType.equals("Daily"))
+        	interestCompoundingPeriodTypeId = "1";
+        else if(interestCompoundingPeriodType.equals("Monthly"))
+        	interestCompoundingPeriodTypeId = "4";
+        String interestPostingPeriodType = readAsString(INTEREST_POSTING_PERIOD_COL, row);
+        String interestPostingPeriodTypeId = "";
+        if(interestPostingPeriodType.equals("Monthly"))
+        	interestPostingPeriodTypeId = "4";
+        else if(interestPostingPeriodType.equals("Quarterly"))
+        	interestPostingPeriodTypeId = "5";
+        else if(interestPostingPeriodType.equals("Annually"))
+        	interestPostingPeriodTypeId = "7";
+        String interestCalculationType = readAsString(INTEREST_CALCULATION_COL, row);
+        String interestCalculationTypeId = "";
+        if(interestCalculationType.equals("Daily Balance"))
+        	interestCalculationTypeId = "1";
+        else if(interestCalculationType.equals("Average Daily Balance"))
+        	interestCalculationTypeId = "2";
+        String interestCalculationDaysInYearType = readAsString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row);
+        String interestCalculationDaysInYearTypeId = "";
+        if(interestCalculationDaysInYearType.equals("360 Days"))
+        	interestCalculationDaysInYearTypeId = "360";
+        else if(interestCalculationDaysInYearType.equals("365 Days"))
+        	interestCalculationDaysInYearTypeId = "365";
+        String minRequiredOpeningBalance = readAsString(MIN_OPENING_BALANCE_COL, row);
+        String lockinPeriodFrequency = readAsString(LOCKIN_PERIOD_COL, row);
+        String lockinPeriodFrequencyType = readAsString(LOCKIN_PERIOD_FREQUENCY_COL, row);
+        String lockinPeriodFrequencyTypeId = "";
+        if(lockinPeriodFrequencyType.equals("Days"))
+        	lockinPeriodFrequencyTypeId = "0";
+        else if(lockinPeriodFrequencyType.equals("Weeks"))
+        	lockinPeriodFrequencyTypeId = "1";
+        else if(lockinPeriodFrequencyType.equals("Months"))
+        	lockinPeriodFrequencyTypeId = "2";
+        else if(lockinPeriodFrequencyType.equals("Years"))
+        	lockinPeriodFrequencyTypeId = "3";
+        String withdrawalFeeAmount = readAsString(WITHDRAWAL_FEE_AMOUNT_COL, row);
+        String withdrawalFeeType = readAsString(WITHDRAWAL_FEE_TYPE_COL, row);
+        String withdrawalFeeTypeId = "";
+        if(withdrawalFeeType.equals("Flat"))
+        	withdrawalFeeTypeId = "1";
+        else if(withdrawalFeeType.equals("% of Amount"))
+        	withdrawalFeeTypeId = "2";
+        String annualFeeAmount = readAsString(ANNUAL_FEE_COL, row);
+        String annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row);
+        return new Savings(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
+        		interestCalculationTypeId, interestCalculationDaysInYearTypeId, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeId, withdrawalFeeAmount,
+        		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, row.getRowNum(), status);
+    }
+    private Approval parseAsSavingsApproval(Row row) {
+    	String approvalDate = readAsDate(APPROVED_DATE_COL, row);
+    	if(!approvalDate.equals(""))
+            return new Approval(approvalDate, row.getRowNum());
+         else
+            return null;	
+    }
+    private SavingsActivation parseAsSavingsActivation(Row row) {
+    	String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
+    	 if(!activationDate.equals(""))
+             return new SavingsActivation(activationDate, row.getRowNum());
+          else
+             return null;
     }
     
     @Override
@@ -169,7 +179,6 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
                   payload = gson.toJson(savings.get(i));
                   logger.info(payload);
                   response = restClient.post("savingsaccounts", payload);
-                  logger.info(response);
                   progressLevel = 1;
                 
                   JsonParser parser = new JsonParser();
@@ -226,6 +235,18 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
     	writeString(SAVINGS_ID_COL, rowHeader, "Loan ID");
     	writeString(FAILURE_REPORT_COL, rowHeader, "Report");
         return result;
+    }
+    
+    public List<Savings> getSavings() {
+    	return savings;
+    }
+    
+    public List<Approval> getApprovalDates() {
+    	return approvalDates;
+    }
+    
+    public List<SavingsActivation> getActivationDates() {
+    	return activationDates;
     }
     
 }

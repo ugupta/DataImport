@@ -28,6 +28,10 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         	
         return noOfEntries;
     }
+    
+    protected boolean isNotImported(Row row, int statusColumn) {
+		return !readAsString(statusColumn, row).equals("Imported");
+	}
 
     protected String readAsInt(int colIndex, Row row) {
         try {

@@ -1,4 +1,4 @@
-package org.openmf.mifos.dataimport;
+package org.openmf.mifos.dataimport.populator;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

@@ -56,7 +56,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
             Row row;
             try {
                 row = clientSheet.getRow(rowIndex);
-                if(isNotImported(row)) {
+                if(isNotImported(row, STATUS_COL)) {
                     clients.add(parseAsClient(row));
                 }
             } catch (Exception e) {
@@ -74,9 +74,6 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
         	return "Corporate";
 	}
 
-	private boolean isNotImported(Row row) {
-		return !readAsString(STATUS_COL, row).equals("Imported");
-	}
 
     private Client parseAsClient(Row row) {
     	String officeName = readAsString(OFFICE_NAME_COL, row);
