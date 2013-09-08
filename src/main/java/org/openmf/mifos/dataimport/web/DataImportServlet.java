@@ -37,10 +37,10 @@ public class DataImportServlet extends HttpServlet {
         try {
             Part part = request.getPart("file");
             filename = readFileName(part);
-            ImportFormatType type = ImportFormatType.of(part.getContentType());
+            ImportFormatType.of(part.getContentType());
             InputStream content = part.getInputStream();
             Workbook workbook = new HSSFWorkbook(content);
-            DataImportHandler handler = ImportHandlerFactory.createImportHandler(workbook, type);
+            DataImportHandler handler = ImportHandlerFactory.createImportHandler(workbook);
             Result result = parseAndUpload(handler);
             writeResult(workbook, result, response);
         } catch (IOException e) {
@@ -49,7 +49,7 @@ public class DataImportServlet extends HttpServlet {
 
     }
 
-    String readFileName(Part part) {
+    private String readFileName(Part part) {
         String filename = null;
         for (String s : part.getHeader("content-disposition").split(";")) {
             if (s.trim().startsWith("filename")) {
@@ -59,7 +59,7 @@ public class DataImportServlet extends HttpServlet {
         return filename;
     }
 
-    Result parseAndUpload(DataImportHandler handler) throws IOException {
+    private Result parseAndUpload(DataImportHandler handler) throws IOException {
         Result result = handler.parse();
         if (result.isSuccess()) {
             result = handler.upload();
@@ -67,7 +67,7 @@ public class DataImportServlet extends HttpServlet {
         return result;
     }
 
-    void writeResult(Workbook workbook, Result result, HttpServletResponse response) throws IOException {
+    private void writeResult(Workbook workbook, Result result, HttpServletResponse response) throws IOException {
     	OutputStream stream = response.getOutputStream();
         OutputStreamWriter out = new OutputStreamWriter(stream,"UTF-8");
         if(result.isSuccess()) {

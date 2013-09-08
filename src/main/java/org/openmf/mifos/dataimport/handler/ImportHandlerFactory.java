@@ -3,12 +3,13 @@ package org.openmf.mifos.dataimport.handler;
 import java.io.IOException;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.openmf.mifos.dataimport.handler.client.ClientDataImportHandler;
 import org.openmf.mifos.dataimport.http.MifosRestClient;
 
 
 public class ImportHandlerFactory {
     
-    public static final DataImportHandler createImportHandler(Workbook workbook, @SuppressWarnings("unused") ImportFormatType type) throws IOException {
+    public static final DataImportHandler createImportHandler(Workbook workbook) throws IOException {
         
         if(workbook.getSheetIndex("Clients") == 0) {
             	return new ClientDataImportHandler(workbook, new MifosRestClient());

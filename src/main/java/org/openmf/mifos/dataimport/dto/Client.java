@@ -28,9 +28,6 @@ public class Client {
     
     
     public Client(String firstname, String lastname, String middlename, String activationDate, String active, String externalId, String officeId, String staffId, Integer rowIndex ) {
-        if(firstname == null || firstname.trim().equals("")) {
-            throw new IllegalArgumentException("Name can not be empty.");
-        }
         this.firstname = firstname;
         this.lastname = lastname;
         this.middlename = middlename;
