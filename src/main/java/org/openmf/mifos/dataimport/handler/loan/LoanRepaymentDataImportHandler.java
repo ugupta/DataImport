@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.openmf.mifos.dataimport.dto.LoanRepayment;
+import org.openmf.mifos.dataimport.dto.Transaction;
 import org.openmf.mifos.dataimport.handler.AbstractDataImportHandler;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
@@ -24,7 +24,7 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
     private final RestClient restClient;
     private final Workbook workbook;
     
-    private List<LoanRepayment> loanRepayments = new ArrayList<LoanRepayment>();
+    private List<Transaction> loanRepayments;
     private String loanAccountId = "";
     
     private static final int LOAN_ACCOUNT_NO_COL = 2;
@@ -41,13 +41,14 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
     public LoanRepaymentDataImportHandler(Workbook workbook, RestClient client) {
         this.workbook = workbook;
         this.restClient = client;
+        loanRepayments = new ArrayList<Transaction>();
     }
     
     @Override
     public Result parse() {
         Result result = new Result();
         Sheet loanRepaymentSheet = workbook.getSheet("LoanRepayment");
-        Integer noOfEntries = getNumberOfRows(loanRepaymentSheet, 5);
+        Integer noOfEntries = getNumberOfRows(loanRepaymentSheet, AMOUNT_COL);
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
@@ -62,7 +63,7 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         return result;
     }
         
-        private LoanRepayment parseAsLoanRepayment(Row row) {
+        private Transaction parseAsLoanRepayment(Row row) {
         	 String loanAccountIdCheck = readAsInt(LOAN_ACCOUNT_NO_COL, row);
              if(!loanAccountIdCheck.equals(""))
                 loanAccountId = loanAccountIdCheck;
@@ -70,13 +71,13 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
              String repaymentDate = readAsDate(REPAID_ON_DATE_COL, row);
              String repaymentType = readAsString(REPAYMENT_TYPE_COL, row);
              String repaymentTypeId = getIdByName(workbook.getSheet("Extras"), repaymentType).toString();
-             String accountNumber = readAsInt(ACCOUNT_NO_COL, row);
-             String checkNumber = readAsInt(CHECK_NO_COL, row);
-             String routingCode = readAsInt(ROUTING_CODE_COL, row);
-             String receiptNumber = readAsInt(RECEIPT_NO_COL, row);
-             String bankNumber = readAsInt(BANK_NO_COL, row);
-             return new LoanRepayment(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
-             		checkNumber, routingCode, receiptNumber, bankNumber, Integer.parseInt(loanAccountId), row.getRowNum());
+             String accountNumber = readAsLong(ACCOUNT_NO_COL, row);
+             String checkNumber = readAsLong(CHECK_NO_COL, row);
+             String routingCode = readAsLong(ROUTING_CODE_COL, row);
+             String receiptNumber = readAsLong(RECEIPT_NO_COL, row);
+             String bankNumber = readAsLong(BANK_NO_COL, row);
+             return new Transaction(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
+             		checkNumber, routingCode, receiptNumber, bankNumber, Integer.parseInt(loanAccountId), "", row.getRowNum());
         }
     
     @Override
@@ -84,18 +85,18 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet loanRepaymentSheet = workbook.getSheet("LoanRepayment");
         restClient.createAuthToken();
-        for (LoanRepayment loanRepayment : loanRepayments) {
+        for (Transaction loanRepayment : loanRepayments) {
             try {
                 Gson gson = new Gson();
                 String payload = gson.toJson(loanRepayment);
-                logger.info("ID: "+loanRepayment.getLoanAccountId()+" : "+payload);
-                restClient.post("loans/" + loanRepayment.getLoanAccountId() + "/transactions?command=repayment", payload);
+                logger.info("ID: "+loanRepayment.getAccountId()+" : "+payload);
+                restClient.post("loans/" + loanRepayment.getAccountId() + "/transactions?command=repayment", payload);
                 Cell statusCell = loanRepaymentSheet.getRow(loanRepayment.getRowIndex()).createCell(STATUS_COL);
                 statusCell.setCellValue("Imported");
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (Exception e) {
             	Cell loanAccountIdCell = loanRepaymentSheet.getRow(loanRepayment.getRowIndex()).createCell(LOAN_ACCOUNT_NO_COL);
-                loanAccountIdCell.setCellValue(loanRepayment.getLoanAccountId());
+                loanAccountIdCell.setCellValue(loanRepayment.getAccountId());
             	String message = parseStatus(e.getMessage());
             	Cell statusCell = loanRepaymentSheet.getRow(loanRepayment.getRowIndex()).createCell(STATUS_COL);
             	statusCell.setCellValue(message);
@@ -108,7 +109,7 @@ public class LoanRepaymentDataImportHandler extends AbstractDataImportHandler {
         return result;
     }
     
-    public List<LoanRepayment> getLoanRepayments() {
+    public List<Transaction> getLoanRepayments() {
     	return loanRepayments;
     }
 }

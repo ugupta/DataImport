@@ -21,6 +21,10 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 	    protected void writeInt(int colIndex, Row row, int value) {
 	            row.createCell(colIndex).setCellValue(value);
 	    }
+	    
+	    protected void writeLong(int colIndex, Row row, long value) {
+            row.createCell(colIndex).setCellValue(value);
+        }
 
 	    protected void writeString(int colIndex, Row row, String value) {
 	           row.createCell(colIndex).setCellValue(value);

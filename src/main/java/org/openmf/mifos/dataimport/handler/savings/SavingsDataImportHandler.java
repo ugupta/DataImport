@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Approval;
-import org.openmf.mifos.dataimport.dto.Savings;
+import org.openmf.mifos.dataimport.dto.SavingsAccount;
 import org.openmf.mifos.dataimport.dto.SavingsActivation;
 import org.openmf.mifos.dataimport.handler.AbstractDataImportHandler;
 import org.openmf.mifos.dataimport.handler.Result;
@@ -44,16 +44,17 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
 	private static final int WITHDRAWAL_FEE_TYPE_COL = 19;
 	private static final int ANNUAL_FEE_COL = 20;
 	private static final int ANNUAL_FEE_ON_MONTH_DAY_COL = 21;
-	private static final int STATUS_COL = 22;
-	private static final int SAVINGS_ID_COL = 23;
-    private static final int FAILURE_REPORT_COL = 24;
+	private static final int APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS = 22;
+	private static final int STATUS_COL = 23;
+	private static final int SAVINGS_ID_COL = 24;
+    private static final int FAILURE_REPORT_COL = 25;
     @SuppressWarnings("CPD-END")
 
     private final RestClient restClient;
     
     private final Workbook workbook;
     
-    private List<Savings> savings = new ArrayList<Savings>();
+    private List<SavingsAccount> savings = new ArrayList<SavingsAccount>();
     private List<Approval> approvalDates = new ArrayList<Approval>();
     private List<SavingsActivation> activationDates = new ArrayList<SavingsActivation>();
 
@@ -84,7 +85,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
         return result;
     }
     
-    private Savings parseAsSavings(Row row) {
+    private SavingsAccount parseAsSavings(Row row) {
     	String status = readAsString(STATUS_COL, row);
     	String clientName = readAsString(CLIENT_NAME_COL, row);
         String clientId = getIdByName(workbook.getSheet("Clients"), clientName).toString();
@@ -141,10 +142,12 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
         	withdrawalFeeTypeId = "2";
         String annualFeeAmount = readAsString(ANNUAL_FEE_COL, row);
         String annualFeeOnMonthDay = readAsDateWithoutYear(ANNUAL_FEE_ON_MONTH_DAY_COL, row);
-        return new Savings(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
+        String applyWithdrawalFeeForTransfers = readAsBoolean(APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row).toString();
+        return new SavingsAccount(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate, interestCompoundingPeriodTypeId, interestPostingPeriodTypeId,
         		interestCalculationTypeId, interestCalculationDaysInYearTypeId, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeId, withdrawalFeeAmount,
-        		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, row.getRowNum(), status);
+        		withdrawalFeeTypeId, annualFeeAmount, annualFeeOnMonthDay, applyWithdrawalFeeForTransfers, row.getRowNum(), status);
     }
+    
     private Approval parseAsSavingsApproval(Row row) {
     	String approvalDate = readAsDate(APPROVED_DATE_COL, row);
     	if(!approvalDate.equals(""))
@@ -152,6 +155,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
          else
             return null;	
     }
+    
     private SavingsActivation parseAsSavingsActivation(Row row) {
     	String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
     	 if(!activationDate.equals(""))
@@ -237,7 +241,7 @@ public class SavingsDataImportHandler extends AbstractDataImportHandler {
         return result;
     }
     
-    public List<Savings> getSavings() {
+    public List<SavingsAccount> getSavings() {
     	return savings;
     }
     

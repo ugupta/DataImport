@@ -17,7 +17,6 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.Office;
 import org.openmf.mifos.dataimport.handler.Result;
-import org.openmf.mifos.dataimport.http.RestClient;
 import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
 import org.slf4j.Logger;
@@ -46,15 +45,14 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
 	private PersonnelSheetPopulator personnelSheetPopulator;
 
-    public ClientWorkbookPopulator(String clientType, RestClient client) {
+    public ClientWorkbookPopulator(String clientType, OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator ) {
     	this.clientType = clientType;
-    	officeSheetPopulator = new OfficeSheetPopulator(client);
-        personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.FALSE, client);
+    	this.officeSheetPopulator = officeSheetPopulator;
+    	this.personnelSheetPopulator = personnelSheetPopulator;
     }
 
     @Override
     public Result downloadAndParse() {
-    	
     	Result result = officeSheetPopulator.downloadAndParse();
     	if(result.isSuccess()) {
     	   result = personnelSheetPopulator.downloadAndParse();
@@ -134,7 +132,6 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
     private Result setRules(Sheet worksheet) {
     	Result result = new Result();
     	try {
-    	//TODO:Clean this
     	CellRangeAddressList officeNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), 3, 3);
     	CellRangeAddressList staffNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), 4, 4);
     	CellRangeAddressList dateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), 6, 6);

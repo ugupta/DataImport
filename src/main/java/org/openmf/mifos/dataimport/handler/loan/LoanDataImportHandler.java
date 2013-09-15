@@ -11,7 +11,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.Loan;
 import org.openmf.mifos.dataimport.dto.LoanDisbursal;
-import org.openmf.mifos.dataimport.dto.LoanRepayment;
+import org.openmf.mifos.dataimport.dto.Transaction;
 import org.openmf.mifos.dataimport.handler.AbstractDataImportHandler;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.http.RestClient;
@@ -63,7 +63,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     private List<Loan> loans = new ArrayList<Loan>();
     private List<Approval> approvalDates = new ArrayList<Approval>();
     private List<LoanDisbursal> disbursalDates = new ArrayList<LoanDisbursal>();
-    private List<LoanRepayment> loanRepayments = new ArrayList<LoanRepayment>();
+    private List<Transaction> loanRepayments = new ArrayList<Transaction>();
     
     private final RestClient restClient;
     
@@ -197,13 +197,13 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
             return null;
     }
     
-    private LoanRepayment parseAsLoanRepayment(Row row) {
+    private Transaction parseAsLoanRepayment(Row row) {
     	String repaymentAmount = readAsDouble(TOTAL_AMOUNT_REPAID_COL, row).toString();
         String lastRepaymentDate = readAsDate(LAST_REPAYMENT_DATE_COL, row);
         String repaymentType = readAsString(REPAYMENT_TYPE_COL, row);
         String repaymentTypeId = getIdByName(workbook.getSheet("Extras"), repaymentType).toString();
         if(!repaymentAmount.equals(""))
-            return new LoanRepayment(repaymentAmount, lastRepaymentDate, repaymentTypeId, row.getRowNum());
+            return new Transaction(repaymentAmount, lastRepaymentDate, repaymentTypeId, row.getRowNum());
          else
             return null;	
     }
@@ -307,7 +307,7 @@ public class LoanDataImportHandler extends AbstractDataImportHandler {
     	return disbursalDates;
     }
     
-    public List<LoanRepayment> getLoanRepayments() {
+    public List<Transaction> getLoanRepayments() {
     	return loanRepayments;
     }
 }

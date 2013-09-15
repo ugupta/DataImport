@@ -13,7 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmf.mifos.dataimport.dto.Approval;
 import org.openmf.mifos.dataimport.dto.Loan;
 import org.openmf.mifos.dataimport.dto.LoanDisbursal;
-import org.openmf.mifos.dataimport.dto.LoanRepayment;
+import org.openmf.mifos.dataimport.dto.Transaction;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.handler.loan.LoanDataImportHandler;
 import org.openmf.mifos.dataimport.http.RestClient;
@@ -39,7 +39,7 @@ public class LoanImportHandlerTest {
         Loan loan = handler.getLoans().get(0);
         Approval loanApproval = handler.getApprovalDates().get(0);
         LoanDisbursal loanDisbursal = handler.getDisbursalDates().get(0);
-        LoanRepayment loanRepayment = handler.getLoanRepayments().get(0);
+        Transaction loanRepayment = handler.getLoanRepayments().get(0);
         Assert.assertEquals("1", loan.getClientId());
         Assert.assertEquals("1", handler.getIdByName(book.getSheet("Clients"), "Arsene K Wenger").toString());
         Assert.assertEquals("1", loan.getProductId());

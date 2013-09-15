@@ -19,7 +19,6 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.SavingsProduct;
 import org.openmf.mifos.dataimport.handler.Result;
-import org.openmf.mifos.dataimport.http.RestClient;
 import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.openmf.mifos.dataimport.populator.ClientSheetPopulator;
 import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
@@ -57,14 +56,15 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 	private static final int WITHDRAWAL_FEE_TYPE_COL = 19;
 	private static final int ANNUAL_FEE_COL = 20;
 	private static final int ANNUAL_FEE_ON_MONTH_DAY_COL = 21;
+	private static final int APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS = 22;
     private static final int LOOKUP_CLIENT_NAME_COL = 31;
     private static final int LOOKUP_ACTIVATION_DATE_COL = 32;
     @SuppressWarnings("CPD-END")
 	
-	public SavingsWorkbookPopulator(RestClient restClient) {
-    	clientSheetPopulator = new ClientSheetPopulator(restClient);
-    	personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.TRUE, restClient);
-    	productSheetPopulator = new SavingsProductSheetPopulator(restClient);
+	public SavingsWorkbookPopulator(ClientSheetPopulator clientSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator, SavingsProductSheetPopulator productSheetPopulator) {
+    	this.clientSheetPopulator = clientSheetPopulator;
+    	this.personnelSheetPopulator = personnelSheetPopulator;
+    	this.productSheetPopulator = productSheetPopulator;
     }
 	
 	  @Override
@@ -121,6 +121,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             worksheet.setColumnWidth(WITHDRAWAL_FEE_TYPE_COL, 3000);
             worksheet.setColumnWidth(ANNUAL_FEE_COL, 3000);
             worksheet.setColumnWidth(ANNUAL_FEE_ON_MONTH_DAY_COL, 3000);
+            worksheet.setColumnWidth(APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, 4000);
             
             worksheet.setColumnWidth(LOOKUP_CLIENT_NAME_COL, 6000);
             worksheet.setColumnWidth(LOOKUP_ACTIVATION_DATE_COL, 6000);
@@ -145,6 +146,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             writeString(WITHDRAWAL_FEE_AMOUNT_COL, rowHeader, "Withdrawal Fee");
             writeString(ANNUAL_FEE_COL, rowHeader, "Annual Fee");
             writeString(ANNUAL_FEE_ON_MONTH_DAY_COL, rowHeader, "On Date");
+            writeString(APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, rowHeader, "Apply Withdrawal Fee For Transfers");
             
             writeString(LOOKUP_CLIENT_NAME_COL, rowHeader, "Client Name");
             writeString(LOOKUP_ACTIVATION_DATE_COL, rowHeader, "Client Activation Date");
@@ -166,6 +168,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	CellRangeAddressList interestCalculationDaysInYearRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), INTEREST_CALCULATION_DAYS_IN_YEAR_COL, INTEREST_CALCULATION_DAYS_IN_YEAR_COL);
 	        	CellRangeAddressList lockinPeriodFrequencyRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), LOCKIN_PERIOD_FREQUENCY_COL, LOCKIN_PERIOD_FREQUENCY_COL);
 	        	CellRangeAddressList withdrawalFeeTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), WITHDRAWAL_FEE_TYPE_COL, WITHDRAWAL_FEE_TYPE_COL);
+	        	CellRangeAddressList applyWithdrawalFeeForTransfersRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS);
 	        	
 	        	DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
 	        	Workbook savingsWorkbook = worksheet.getWorkbook();
@@ -209,7 +212,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 	        		Name decimalPlacesName = savingsWorkbook.createName();
 	        		Name inMultiplesOfName = savingsWorkbook.createName();
 	        		SavingsProduct product = products.get(i);
-	        		String productName = product.getName();
+	        		String productName = product.getName().replaceAll("[ ]", "_");
 	        		if(product.getNominalAnnualInterestRate() != null) {
 	        		   interestRateName.setNameName(productName + "_Interest_Rate");
 	        		   interestRateName.setRefersToFormula("Products!$C$" + (i + 2));
@@ -274,28 +277,20 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 	        	DataValidationConstraint interestCalculationDaysInYearConstraint = validationHelper.createExplicitListConstraint(new String[] {"360 Days","365 Days"});
 	        	DataValidationConstraint lockinPeriodFrequencyConstraint = validationHelper.createExplicitListConstraint(new String[] {"Days","Weeks","Months","Years"});
 	        	DataValidationConstraint withdrawalFeeTypeConstraint = validationHelper.createExplicitListConstraint(new String[] {"Flat","% of Amount"});
+	        	DataValidationConstraint applyWithdrawalFeeForTransferConstraint = validationHelper.createExplicitListConstraint(new String[] {"True","False"});
 	        	
 	        	
 	        	DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
-	        	officeValidation.setSuppressDropDownArrow(false);
 	        	DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
-	        	clientValidation.setSuppressDropDownArrow(false);
 	        	DataValidation productNameValidation = validationHelper.createValidation(productNameConstraint, productNameRange);
-	        	productNameValidation.setSuppressDropDownArrow(false);
 	        	DataValidation fieldOfficerValidation = validationHelper.createValidation(fieldOfficerNameConstraint, fieldOfficerRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation interestCompudingPeriodValidation = validationHelper.createValidation(interestCompudingPeriodConstraint, interestCompudingPeriodRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation interestPostingPeriodValidation = validationHelper.createValidation(interestPostingPeriodConstraint, interestPostingPeriodRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation interestCalculationValidation = validationHelper.createValidation(interestCalculationConstraint, interestCalculationRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation interestCalculationDaysInYearValidation = validationHelper.createValidation(interestCalculationDaysInYearConstraint, interestCalculationDaysInYearRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation lockinPeriodFrequencyValidation = validationHelper.createValidation(lockinPeriodFrequencyConstraint, lockinPeriodFrequencyRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
 	        	DataValidation withdrawalFeeTypeValidation = validationHelper.createValidation(withdrawalFeeTypeConstraint, withdrawalFeeTypeRange);
-	        	fieldOfficerValidation.setSuppressDropDownArrow(false);
+	        	DataValidation applyWithdrawalFeeForTransferValidation = validationHelper.createValidation(applyWithdrawalFeeForTransferConstraint, applyWithdrawalFeeForTransfersRange);
 	        	DataValidation submittedDateValidation = validationHelper.createValidation(submittedDateConstraint, submittedDateRange);
 	        	DataValidation approvalDateValidation = validationHelper.createValidation(approvalDateConstraint, approvedDateRange);
 	        	DataValidation activationDateValidation = validationHelper.createValidation(activationDateConstraint, activationDateRange);
@@ -313,6 +308,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 	            worksheet.addValidationData(interestCalculationDaysInYearValidation);
 	            worksheet.addValidationData(lockinPeriodFrequencyValidation);
 	            worksheet.addValidationData(withdrawalFeeTypeValidation);
+	            worksheet.addValidationData(applyWithdrawalFeeForTransferValidation);
 	        	
 	    	} catch (RuntimeException re) {
 	    		result.addError(re.getMessage());

@@ -35,6 +35,7 @@ public class DataImportServlet extends HttpServlet {
 
         String filename = "";
         try {
+        	logger.info("CHECKING");
             Part part = request.getPart("file");
             filename = readFileName(part);
             ImportFormatType.of(part.getContentType());

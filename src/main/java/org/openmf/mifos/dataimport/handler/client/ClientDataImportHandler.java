@@ -52,6 +52,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
         Sheet clientSheet = workbook.getSheet("Clients");
         Integer noOfEntries = getNumberOfRows(clientSheet, 0);
         clientType = getClientType(clientSheet);
+        logger.info("CROSS"+noOfEntries);
         for (int rowIndex = 1; rowIndex < noOfEntries; rowIndex++) {
             Row row;
             try {
@@ -83,6 +84,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
         String externalId = readAsString(EXTERNAL_ID_COL, row);
         String activationDate = readAsDate(ACTIVATION_DATE_COL, row);
         String active = readAsBoolean(ACTIVE_COL, row).toString();
+        logger.info("CHECK1");
         if(clientType.equals("Individual")) {
             String firstName = readAsString(FIRST_NAME_COL, row);
             String lastName = readAsString(LAST_NAME_COL, row);
@@ -90,6 +92,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
             if(StringUtils.isBlank(firstName)) {
             	throw new IllegalArgumentException("Name is blank");
             }
+            logger.info("CHECK2");
             return new Client(firstName, lastName, middleName, activationDate, active, externalId, officeId, staffId, row.getRowNum());
         } else {
             String fullName = readAsString(FULL_NAME_COL, row);
@@ -105,6 +108,7 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
         Result result = new Result();
         Sheet clientSheet = workbook.getSheet("Clients");
         restClient.createAuthToken();
+        logger.info("CHECK" + clients.size());
         for (Client client : clients) {
             try {
                 Gson gson = new Gson();

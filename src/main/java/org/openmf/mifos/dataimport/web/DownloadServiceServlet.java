@@ -25,7 +25,6 @@ public class DownloadServiceServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		String fileName = request.getParameter("template");
-		
 		try{
 			String parameter = null;
 			if(request.getParameter("template").equals("client"))

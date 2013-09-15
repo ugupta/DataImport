@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openmf.mifos.dataimport.dto.LoanRepayment;
+import org.openmf.mifos.dataimport.dto.Transaction;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.handler.loan.LoanRepaymentDataImportHandler;
 import org.openmf.mifos.dataimport.http.RestClient;
@@ -18,7 +18,7 @@ import org.openmf.mifos.dataimport.http.RestClient;
 @RunWith(MockitoJUnitRunner.class)
 public class LoanRepaymentImportHandlerTest {
 
-	 @Mock
+	    @Mock
 	    RestClient restClient;
 	    
 	    @Test
@@ -30,10 +30,10 @@ public class LoanRepaymentImportHandlerTest {
 	        Result result = handler.parse();
 	        Assert.assertTrue(result.isSuccess());
 	        Assert.assertEquals(2, handler.getLoanRepayments().size());
-	        LoanRepayment loanRepayment = handler.getLoanRepayments().get(0);
-	        LoanRepayment loanRepaymentWithoutId = handler.getLoanRepayments().get(1);
-	        Assert.assertEquals("1", loanRepayment.getLoanAccountId().toString());
-	        Assert.assertEquals("1", loanRepaymentWithoutId.getLoanAccountId().toString());
+	        Transaction loanRepayment = handler.getLoanRepayments().get(0);
+	        Transaction loanRepaymentWithoutId = handler.getLoanRepayments().get(1);
+	        Assert.assertEquals("1", loanRepayment.getAccountId().toString());
+	        Assert.assertEquals("1", loanRepaymentWithoutId.getAccountId().toString());
 	        Assert.assertEquals("1300.0", loanRepayment.getTransactionAmount());
 	        Assert.assertEquals("700.0", loanRepaymentWithoutId.getTransactionAmount());
 	        Assert.assertEquals("01 September 2013", loanRepayment.getTransactionDate());

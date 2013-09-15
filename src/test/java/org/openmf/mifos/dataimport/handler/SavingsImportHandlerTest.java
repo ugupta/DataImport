@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmf.mifos.dataimport.dto.Approval;
-import org.openmf.mifos.dataimport.dto.Savings;
+import org.openmf.mifos.dataimport.dto.SavingsAccount;
 import org.openmf.mifos.dataimport.dto.SavingsActivation;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.handler.savings.SavingsDataImportHandler;
@@ -34,7 +34,7 @@ public class SavingsImportHandlerTest {
         Assert.assertEquals(1, handler.getSavings().size());
         Assert.assertEquals(1, handler.getApprovalDates().size());
         Assert.assertEquals(1, handler.getActivationDates().size());
-        Savings savings = handler.getSavings().get(0);
+        SavingsAccount savings = handler.getSavings().get(0);
         Approval savingsApproval = handler.getApprovalDates().get(0);
         SavingsActivation savingsActivation = handler.getActivationDates().get(0);
         

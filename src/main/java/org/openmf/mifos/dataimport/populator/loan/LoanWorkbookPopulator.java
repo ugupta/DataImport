@@ -20,15 +20,16 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.openmf.mifos.dataimport.dto.LoanProduct;
 import org.openmf.mifos.dataimport.handler.Result;
-import org.openmf.mifos.dataimport.http.RestClient;
 import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.openmf.mifos.dataimport.populator.ClientSheetPopulator;
 import org.openmf.mifos.dataimport.populator.ExtrasSheetPopulator;
 import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	
-//	private static final Logger logger = LoggerFactory.getLogger(LoanWorkbookPopulator.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoanWorkbookPopulator.class);
 	
 	private ClientSheetPopulator clientSheetPopulator;
 	private PersonnelSheetPopulator personnelSheetPopulator;
@@ -70,11 +71,12 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
     private static final int LOOKUP_ACTIVATION_DATE_COL = 43;
     @SuppressWarnings("CPD-END")
 	
-	public LoanWorkbookPopulator(RestClient restClient) {
-		clientSheetPopulator = new ClientSheetPopulator(restClient);
-    	personnelSheetPopulator = new PersonnelSheetPopulator(Boolean.TRUE, restClient);
-    	productSheetPopulator = new LoanProductSheetPopulator(restClient);
-    	extrasSheetPopulator = new ExtrasSheetPopulator(restClient);
+	public LoanWorkbookPopulator(ClientSheetPopulator clientSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
+			LoanProductSheetPopulator productSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+    	this.clientSheetPopulator = clientSheetPopulator;
+		this.personnelSheetPopulator = personnelSheetPopulator;
+    	this.productSheetPopulator = productSheetPopulator;
+    	this.extrasSheetPopulator = extrasSheetPopulator;
     }
 	
 	    @Override
@@ -93,7 +95,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    public Result populate(Workbook workbook) {
 	    	Sheet loanSheet = workbook.createSheet("Loans");
 	    	Result result = clientSheetPopulator.populate(workbook);
-	    	if(result.isSuccess())
+	    	if(result.isSuccess()) 
 	    		result = personnelSheetPopulator.populate(workbook);
 	    	if(result.isSuccess())
 	    		result = productSheetPopulator.populate(workbook);
@@ -190,7 +192,6 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	    private Result setRules(Sheet worksheet) {
 	    	Result result = new Result();
 	    	try {
-	    		//TODO: Clean this.
 	    		CellRangeAddressList officeNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), OFFICE_NAME_COL, OFFICE_NAME_COL);
 	        	CellRangeAddressList clientNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CLIENT_NAME_COL, CLIENT_NAME_COL);
 	        	CellRangeAddressList productNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), PRODUCT_COL, PRODUCT_COL);
@@ -278,28 +279,30 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        		Name graceOnInterestPaymentName = loanWorkbook.createName();
 	        		Name graceOnInterestChargedName = loanWorkbook.createName();
 	        		Name startDateName = loanWorkbook.createName();
-	        	    fundName.setNameName(products.get(i).getName() + "_FUND");
-	        	    principalName.setNameName(products.get(i).getName() + "_PRINCIPAL");
-	        	    minPrincipalName.setNameName(products.get(i).getName() + "_MIN_PRINCIPAL");
-	        	    maxPrincipalName.setNameName(products.get(i).getName() + "_MAX_PRINCIPAL");
-	        	    noOfRepaymentName.setNameName(products.get(i).getName() + "_NO_REPAYMENT");
-	        	    minNoOfRepayment.setNameName(products.get(i).getName() + "_MIN_REPAYMENT");
-	        	    maxNoOfRepaymentName.setNameName(products.get(i).getName() + "_MAX_REPAYMENT");
-	        	    repaymentEveryName.setNameName(products.get(i).getName() + "_REPAYMENT_EVERY");
-	        	    repaymentFrequencyName.setNameName(products.get(i).getName() + "_REPAYMENT_FREQUENCY");
-	        	    interestName.setNameName(products.get(i).getName() + "_INTEREST");
-	        	    minInterestName.setNameName(products.get(i).getName() + "_MIN_INTEREST");
-	        	    maxInterestName.setNameName(products.get(i).getName() + "_MAX_INTEREST");
-	        	    interestFrequencyName .setNameName(products.get(i).getName() + "_INTEREST_FREQUENCY");
-	        	    amortizationName.setNameName(products.get(i).getName() + "_AMORTIZATION");
-	        	    interestTypeName.setNameName(products.get(i).getName() + "_INTEREST_TYPE");
-	        	    interestCalculationPeriodName.setNameName(products.get(i).getName() + "_INTEREST_CALCULATION");
-	        	    transactionProcessingStrategyName.setNameName(products.get(i).getName() + "_STRATEGY");
-	        	    arrearsToleranceName.setNameName(products.get(i).getName() + "_ARREARS_TOLERANCE");
-	        	    graceOnPrincipalPaymentName.setNameName(products.get(i).getName() + "_GRACE_PRINCIPAL");
-	        	    graceOnInterestPaymentName.setNameName(products.get(i).getName() + "_GRACE_INTEREST_PAYMENT");
-	        	    graceOnInterestChargedName.setNameName(products.get(i).getName() + "_GRACE_INTEREST_CHARGED");
-	        	    startDateName.setNameName(products.get(i).getName() + "_START_DATE");
+	        		String productName = products.get(i).getName().replaceAll("[ ]", "_");
+	        		logger.info(productName);
+	        	    fundName.setNameName(productName + "_FUND");
+	        	    principalName.setNameName(productName + "_PRINCIPAL");
+	        	    minPrincipalName.setNameName(productName + "_MIN_PRINCIPAL");
+	        	    maxPrincipalName.setNameName(productName + "_MAX_PRINCIPAL");
+	        	    noOfRepaymentName.setNameName(productName + "_NO_REPAYMENT");
+	        	    minNoOfRepayment.setNameName(productName + "_MIN_REPAYMENT");
+	        	    maxNoOfRepaymentName.setNameName(productName + "_MAX_REPAYMENT");
+	        	    repaymentEveryName.setNameName(productName + "_REPAYMENT_EVERY");
+	        	    repaymentFrequencyName.setNameName(productName + "_REPAYMENT_FREQUENCY");
+	        	    interestName.setNameName(productName + "_INTEREST");
+	        	    minInterestName.setNameName(productName + "_MIN_INTEREST");
+	        	    maxInterestName.setNameName(productName + "_MAX_INTEREST");
+	        	    interestFrequencyName .setNameName(productName + "_INTEREST_FREQUENCY");
+	        	    amortizationName.setNameName(productName + "_AMORTIZATION");
+	        	    interestTypeName.setNameName(productName + "_INTEREST_TYPE");
+	        	    interestCalculationPeriodName.setNameName(productName + "_INTEREST_CALCULATION");
+	        	    transactionProcessingStrategyName.setNameName(productName + "_STRATEGY");
+	        	    arrearsToleranceName.setNameName(productName + "_ARREARS_TOLERANCE");
+	        	    graceOnPrincipalPaymentName.setNameName(productName + "_GRACE_PRINCIPAL");
+	        	    graceOnInterestPaymentName.setNameName(productName + "_GRACE_INTEREST_PAYMENT");
+	        	    graceOnInterestChargedName.setNameName(productName + "_GRACE_INTEREST_CHARGED");
+	        	    startDateName.setNameName(productName + "_START_DATE");
 	        	    if(products.get(i).getFundName() != null)
 	        	        fundName.setRefersToFormula("Products!$C$" + (i + 2));
 	        	    principalName.setRefersToFormula("Products!$D$" + (i + 2));

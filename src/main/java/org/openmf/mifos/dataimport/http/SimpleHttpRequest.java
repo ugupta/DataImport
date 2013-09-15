@@ -21,18 +21,19 @@ public class SimpleHttpRequest {
     public SimpleHttpRequest(String url, Method method, Map<String, String> headers, String content) throws IOException {
         URL obj = new URL(url);
         connection = (HttpURLConnection) obj.openConnection();
+        TrustModifier.relaxHostChecking(connection);
         connection.setRequestMethod(method.name());
         connection.setReadTimeout(HTTP_TIMEOUT);
         connection.setUseCaches(false);
         for (Entry<String, String> header : headers.entrySet()) {
             connection.addRequestProperty(header.getKey(), header.getValue());
         }
-        if (content != null) {
-            connection.setDoOutput(true);
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(),"UTF-8");
-            out.write(content);
-            close(out);
-        }
+           if (content != null) {
+               connection.setDoOutput(true);
+               OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(),"UTF-8");
+               out.write(content);
+               close(out);
+           }
     }
 
     private void close(OutputStreamWriter out) throws IOException {

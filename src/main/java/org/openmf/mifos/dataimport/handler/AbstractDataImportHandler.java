@@ -44,6 +44,17 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         }
     }
     
+    protected String readAsLong(int colIndex, Row row) {
+        try {
+        	Cell c = row.getCell(colIndex);
+        	if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        		return "";
+        	return ((Double) c.getNumericCellValue()).longValue() + "";
+        } catch (RuntimeException re) {
+            return row.getCell(colIndex).getStringCellValue();
+        }
+    }
+    
     protected Double readAsDouble(int colIndex, Row row) {
     	return row.getCell(colIndex).getNumericCellValue();
     }
@@ -53,7 +64,7 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
         	Cell c = row.getCell(colIndex);
         	if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
         		return "";
-            return c.getStringCellValue();
+            return c.getStringCellValue().trim();
         } catch (Exception e) {
             return ((Double)row.getCell(colIndex).getNumericCellValue()).intValue() + "";
         }
@@ -84,6 +95,9 @@ public abstract class AbstractDataImportHandler implements DataImportHandler {
     }
     
     protected Boolean readAsBoolean(int colIndex, Row row) {
+    	Cell c = row.getCell(colIndex);
+		if(c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+			return false;
     	return row.getCell(colIndex).getBooleanCellValue();
     }
     
