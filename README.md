@@ -9,4 +9,4 @@ Build Status
 Travis
 
 [![Build
-Status](https://travis-ci.org/avikganguly01/DataImport.png?branch=master)](https://travis-ci.org/avarice010/DataImport)
+Status](https://travis-ci.org/ugupta/DataImport.png?branch=master)](https://travis-ci.org/ugupta/DataImport)
