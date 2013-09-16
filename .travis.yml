@@ -3,3 +3,4 @@ jdk:
   - openjdk6
 notifications:
   email: true
+script: "gradle clean build"

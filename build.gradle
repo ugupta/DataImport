@@ -9,7 +9,6 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'tomcat'
@@ -53,18 +52,9 @@ dependencies {
                  'org.mockito:mockito-all:1.9.5'
 
 }
-tomcatRun {
-    httpPort = 8070
-    httpsPort = 8433
-    stopPort = 8071
-    stopKey=   'stopKey'
-    enableSSL = false
-}
 
 tomcatRunWar {
     httpPort = 8070
     httpsPort = 8433
     stopPort = 8071
-    stopKey=   'stopKey'
-    enableSSL = false
 }
