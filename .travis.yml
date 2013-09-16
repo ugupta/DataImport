@@ -2,4 +2,4 @@ language: java
 jdk:
   - oraclejdk7
 script: 
-  - - TERM=dumb ./gradlew clean build
+  - TERM=dumb ./gradlew clean build
