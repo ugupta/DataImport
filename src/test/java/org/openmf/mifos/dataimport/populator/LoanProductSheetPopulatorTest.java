@@ -97,9 +97,9 @@ public class LoanProductSheetPopulatorTest {
     		    "\"code\": \"accountingRuleType.none\",\"value\": \"NONE\"}}]");
 
     	populator = new LoanProductSheetPopulator(restClient);
-    	Result result = populator.downloadAndParse();
+    	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result =  populator.populate(book);
     	
     	Assert.assertTrue(result.isSuccess());
     	Mockito.verify(restClient, Mockito.atLeastOnce()).get("loanproducts");

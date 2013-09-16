@@ -78,9 +78,9 @@ public class ClientSheetPopulatorTest {
          		"\"hierarchy\": \".2.\",\"parentId\": 1,\"parentName\": \"Head Office\"}]");
 
         populator = new ClientSheetPopulator(restClient);
-     	Result result = populator.downloadAndParse();
+     	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result = populator.populate(book);
     	Map<Integer, Integer> lastColumnLetters = populator.getLastColumnLetters();
     	Map<String, ArrayList<String>> officeToClients = populator.getOfficeToClients();
     	Map<String, Integer> clientNameToClientId = populator.getClientNameToClientId();

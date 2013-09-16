@@ -1,3 +1,5 @@
+
+
 package org.openmf.mifos.dataimport.populator.client;
 
 import java.util.List;
@@ -15,10 +17,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
+
 import org.openmf.mifos.dataimport.dto.Office;
 import org.openmf.mifos.dataimport.handler.Result;
 import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,13 +165,9 @@ public class ClientWorkbookPopulator extends AbstractWorkbookPopulator {
 
 
     	DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
-    	officeValidation.setSuppressDropDownArrow(false);
     	DataValidation staffValidation = validationHelper.createValidation(staffNameConstraint, staffNameRange);
-    	staffValidation.setSuppressDropDownArrow(false);
     	DataValidation activationDateValidation = validationHelper.createValidation(activationDateConstraint, dateRange);
-    	activationDateValidation.setSuppressDropDownArrow(false);
     	DataValidation activeValidation = validationHelper.createValidation(activeConstraint, activeRange);
-    	activeValidation.setSuppressDropDownArrow(false);
 
     	worksheet.addValidationData(activeValidation);
         worksheet.addValidationData(officeValidation);

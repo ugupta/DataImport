@@ -6,14 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
-import javax.net.ssl.SSLSession;
-
 import org.openmf.mifos.dataimport.dto.AuthToken;
 import org.openmf.mifos.dataimport.http.SimpleHttpRequest.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
 
 
 public class MifosRestClient implements RestClient {
@@ -30,24 +26,24 @@ public class MifosRestClient implements RestClient {
 
     private String authToken;
     
-    static {
-	    //for localhost testing only
-	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-	    new javax.net.ssl.HostnameVerifier(){
-
-	    	@Override
-	        public boolean verify(String hostname, @SuppressWarnings("unused") SSLSession sslSession) {
-	            if (hostname.equals("localhost")) {
-	                return true;
-	            }
-	            return false;
-	        }
-	    });
-	}
+//    static {
+//	    //for localhost testing only
+//	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+//	    new javax.net.ssl.HostnameVerifier(){
+//
+//	    	@Override
+//	        public boolean verify(String hostname, @SuppressWarnings("unused") SSLSession sslSession) {
+//	            if (hostname.equals("localhost")) {
+//	                return true;
+//	            }
+//	            return false;
+//	        }
+//	    });
+//	}
     
     public MifosRestClient() {
     	
-        baseURL = "https://localhost:8443/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
+        baseURL = "https://demo.openmf.org/mifosng-provider/api/v1/"; // System.getProperty("mifos.endpoint");
         userName = "mifos"; // System.getProperty("mifos.user.id");
         password = "password"; // System.getProperty("mifos.password");
         tenantId = "default"; // System.getProperty("mifos.tenant.id");
@@ -107,7 +103,7 @@ public class MifosRestClient implements RestClient {
             SimpleHttpResponse response = new HttpRequestBuilder().withURL(url).withMethod(Method.POST)
                         .addHeader(Header.MIFOS_TENANT_ID, tenantId)
                         .addHeader(Header.CONTENT_TYPE, "application/json; charset=utf-8").execute();
-            logger.info("Status: "+response.getStatus() + " - Auth Token Created");
+            logger.info("Status: "+response.getStatus());
             String content = readContentAndClose(response.getContent());
             AuthToken auth = new Gson().fromJson(content, AuthToken.class);
             authToken = auth.getBase64EncodedAuthenticationKey();

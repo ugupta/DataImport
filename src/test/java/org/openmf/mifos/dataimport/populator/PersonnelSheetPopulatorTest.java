@@ -80,9 +80,9 @@ public class PersonnelSheetPopulatorTest {
         		"\"hierarchy\": \".2.\",\"parentId\": 1,\"parentName\": \"Head Office\"}]");
 
         populator = new PersonnelSheetPopulator(Boolean.FALSE, restClient);
-    	Result result = populator.downloadAndParse();
+    	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result = populator.populate(book);
     	
     	Map<String, ArrayList<String>> officeToPersonnel = populator.getOfficeToPersonnel();
     	Map<Integer, Integer> lastColumnLetters = populator.getLastColumnLetters();

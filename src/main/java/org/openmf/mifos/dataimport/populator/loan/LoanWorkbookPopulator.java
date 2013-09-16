@@ -24,12 +24,8 @@ import org.openmf.mifos.dataimport.populator.AbstractWorkbookPopulator;
 import org.openmf.mifos.dataimport.populator.ClientSheetPopulator;
 import org.openmf.mifos.dataimport.populator.ExtrasSheetPopulator;
 import org.openmf.mifos.dataimport.populator.PersonnelSheetPopulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
-	
-	private static final Logger logger = LoggerFactory.getLogger(LoanWorkbookPopulator.class);
 	
 	private ClientSheetPopulator clientSheetPopulator;
 	private PersonnelSheetPopulator personnelSheetPopulator;
@@ -280,7 +276,6 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 	        		Name graceOnInterestChargedName = loanWorkbook.createName();
 	        		Name startDateName = loanWorkbook.createName();
 	        		String productName = products.get(i).getName().replaceAll("[ ]", "_");
-	        		logger.info(productName);
 	        	    fundName.setNameName(productName + "_FUND");
 	        	    principalName.setNameName(productName + "_PRINCIPAL");
 	        	    minPrincipalName.setNameName(productName + "_MIN_PRINCIPAL");

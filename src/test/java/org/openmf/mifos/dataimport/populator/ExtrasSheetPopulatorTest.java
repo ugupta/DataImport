@@ -58,9 +58,9 @@ public class ExtrasSheetPopulatorTest {
         Mockito.when(restClient.get("codes/12/codevalues")).thenReturn("[{\"id\": 10,\"name\": \"Cash\",\"position\": 1},{\"id\": 11,\"name\": \"MPesa\",\"position\": 2}]");
 
     	populator = new ExtrasSheetPopulator(restClient);
-    	Result result = populator.downloadAndParse();
+    	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result = populator.populate(book);
     	
     	Assert.assertTrue(result.isSuccess());
     	Mockito.verify(restClient, Mockito.atLeastOnce()).get("funds");

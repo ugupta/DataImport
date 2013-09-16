@@ -54,7 +54,7 @@ public class TrustModifier {
 	   @Override
       public void checkServerTrusted(@SuppressWarnings("unused") X509Certificate[] arg0, @SuppressWarnings("unused") String arg1) throws CertificateException { }
 	   @Override
-      public X509Certificate[] getAcceptedIssuers() { return null; }      
+      public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }      
    }
    
 }

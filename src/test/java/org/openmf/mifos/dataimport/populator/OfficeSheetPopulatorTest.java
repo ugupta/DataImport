@@ -61,9 +61,9 @@ public class OfficeSheetPopulatorTest {
         		"\"hierarchy\": \".2.\",\"parentId\": 1,\"parentName\": \"Head Office\"}]");
 
     	populator = new OfficeSheetPopulator(restClient);
-    	Result result = populator.downloadAndParse();
+    	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result = populator.populate(book);
     	
     	Assert.assertTrue(result.isSuccess());
     	Mockito.verify(restClient, Mockito.atLeastOnce()).get("offices");

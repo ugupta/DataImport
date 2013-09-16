@@ -79,9 +79,9 @@ public class SavingsProductSheetPopulatorTest {
     		      "\"value\": \"Flat\"},\"annualFeeAmount\": 3.000000,\"annualFeeOnMonthDay\": [9,1],\"accountingRule\": {\"id\": 1,\"code\": \"accountingRuleType.none\",\"value\": \"NONE\"}}]");
 
     	populator = new SavingsProductSheetPopulator(restClient);
-    	Result result = populator.downloadAndParse();
+    	populator.downloadAndParse();
     	Workbook book = new HSSFWorkbook();
-    	result = populator.populate(book);
+    	Result result = populator.populate(book);
     	
     	Assert.assertTrue(result.isSuccess());
     	Mockito.verify(restClient, Mockito.atLeastOnce()).get("savingsproducts");
