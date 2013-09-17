@@ -1,4 +1,4 @@
 language: java
 jdk:
-  - openjdkjdk6
+  - openjdk6
 script: "gradle clean build"
