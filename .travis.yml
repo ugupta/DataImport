@@ -1,5 +1,4 @@
 language: java
 jdk:
-  - oraclejdk7
-script: 
-  - TERM=dumb ./gradlew clean build
+  - openjdkjdk6
+script: "gradle clean build"
